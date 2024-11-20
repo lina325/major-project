@@ -16,7 +16,7 @@ A rhythm game for songs that I haven't found good rhythm games for :D
 - Music that matches up with the tiles 
 - Selection menu 
     - At least 2-3 songs 
-- Decently visually appealing 
+- Decently visually appealing --> Explore 3D?
     - Not just basic colours and elements
 
 ## Nice to Have 
@@ -29,3 +29,8 @@ A rhythm game for songs that I haven't found good rhythm games for :D
 
 - Ablity to make your own maps? (This could be very difficult)
     - Upload music and plan map? 
+
+
+Considering other ideas:
+- Program to take info from a site and place it into a spreadsheet/document 
+- Reading/finding the sine + cosine waves in NMR peaks 
