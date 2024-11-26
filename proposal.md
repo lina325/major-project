@@ -15,8 +15,9 @@ A rhythm game for a few songs that I haven't found good rhythm games for :D
 - Basic tap tiles and hold tiles 
 - Music that matches up with the tiles 
 - Selection menu 
-    - At least 2-3 songs 
-- Decently visually appealing
+    - At least 2-3 songs [Start with 2]
+- Basic scoring + display at end of each level
+- Decently visually appealing [Expand later]
     - Not just basic colours and elements
     - Title/opening screen and ending/level completion screen along with selection and gameplay screens 
 
@@ -26,7 +27,7 @@ A rhythm game for a few songs that I haven't found good rhythm games for :D
 - Selection of colours/theme
 - Multiple levels of difficulty or more songs
     - Easy, normal, hard (+ maybe extreme?)
-- Scoring +/or highscore board
+- Highscore board
 - Moving/video background
 
 ## Far Far Beyond
