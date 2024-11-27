@@ -6,15 +6,20 @@
 // - describe what you did to take this project "above and beyond"
 
 const NUM_OF_COLS = 4;
-const NUM_OF_ROWS = 20;
+// const NUM_OF_ROWS = 20;
+let numOfRows;
 let grid;
 
 let screenState = "selection";
+let selection;
+let songList = loadStrings("songs.txt"); 
+let level;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  grid = new Grid(NUM_OF_COLS, NUM_OF_ROWS);
+  numOfRows = height/127;
+  
+  grid = new Grid(NUM_OF_COLS, numOfRows);
   grid = grid.generate();
 }
 
@@ -29,16 +34,15 @@ function draw() {
     background(220);
     // grid.display(grid);
     display(grid);
+
+    selectSong();
   }
   else if (screenState === "score") {
-
+    displayScore();
   }
 }
 
 function displaySelectionScreen() {
-  let songList = loadStrings("songs.txt");
-  let selection;
-  
   // Set images and text overtop
   text();
 
@@ -48,8 +52,35 @@ function displaySelectionScreen() {
   else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height && mouseIsPressed) {
     selection = 1;
   }
-  
-  return songList[selection];
+}
+
+function selectSong() {
+  if (selection === 1) {
+    // Load song and map
+    level = loadStrings(`${songList[choice]}.txt`);
+  }
+  else if (selection === 2) { //And so on
+
+  }
+}
+
+function displayScore() {
+
+}
+
+function keyPressed() {
+  if (key === "f") {
+
+  }
+  if (key === "g") {
+
+  }
+  if (key === "h") {
+
+  }
+  if (key === "j") {
+    
+  }
 }
 
 function display(array) { //Temporary until you figure out what's wrong (rip)
@@ -93,3 +124,17 @@ class Grid {
   }
 }
 
+class TapTile {
+  constructor(){
+    this.x;
+    this.y;
+  }
+
+  display() {
+
+  }
+
+  checkHit() {
+    // Use dist ?
+  }
+}
