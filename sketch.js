@@ -21,7 +21,7 @@ function setup() {
   numOfRows = height/cellSize;
   
   grid = new Grid(NUM_OF_COLS, numOfRows);
-  grid = grid.generate();
+  gridArray = grid.generate();
 
   songList = loadStrings("songs.txt");
 }
@@ -37,8 +37,7 @@ function draw() {
   }
   else if (screenState === "play") {
     background(200);
-    // grid.display();
-    display(grid);
+    grid.display(gridArray);
 
     // loadSong();
   }
@@ -80,40 +79,10 @@ function displayScore() {
 
 }
 
-function keyPressed() {
-  if (key === "f") {
-
-  }
-  if (key === "g") {
-
-  }
-  if (key === "h") {
-
-  }
-  if (key === "j") {
-    
-  }
-}
-
-function display(array) { //Temporary until you figure out what's wrong (rip)
-  for (let x = 0; x < 4; x++) {
-    for (let y = 0; y < 20; y ++) {
-      if (array[x][y] === 0) {
-        noStroke();
-        rect(x * cellSize + (width/2 - cellSize*2), y * cellSize, cellSize, cellSize);
-
-        line(x * cellSize + (width/2 - cellSize*2), 0, x * cellSize + (width/2 - cellSize*2), height);
-      }
-    }
-  }
-  line(4 * cellSize + (width/2 - cellSize*2), 0, 4 * cellSize + (width/2 - cellSize*2), height);
-}
-
 class Grid {
   constructor(cols, rows) {
     this.cols = cols;
     this.rows = rows;
-    this.cellSize = height/20; //Think about values
     // this.cellHeight = 40; 
   }
 
@@ -129,27 +98,57 @@ class Grid {
     return newGrid;
   }
 
-  display() {
+  display(array) {
     for (let x = 0; x < this.cols; x++) {
       for (let y = 0; y < this.rows; y ++) {
-        // if (array[x][y] === 0) {
-        rect(x * this.cellWidth, y * this.cellHeight, this.cellWidth, this.cellHeight);
-        // }
+        if (array[x][y] === 0) {
+          noStroke();
+          square(x * cellSize + (width/2 - cellSize*2), y * cellSize, cellSize);
+        }
+
+        stroke(200);
+        line(x * cellSize + (width/2 - cellSize*2), 0, x * cellSize + (width/2 - cellSize*2), height);
       }
     }
+    // Make up for missing line on right side
+    line(4 * cellSize + (width/2 - cellSize*2), 0, 4 * cellSize + (width/2 - cellSize*2), height);
+
+    // Draw the target line
+    stroke(0);
+    rect(width/2 - cellSize*2, height - height/8, cellSize * 4, 60); //Try to remove the number
   }
 }
 
 class TapTile {
   constructor(x) {
-    this.tileWidth = cellSize;
     this.tileHeight = 42;
     this.x = x;
     this.y = 0 - this.tileHeight;
   }
 
   display() {
+    rect(this.x, this.y, cellSize, this.tileHeight);
+  }
 
+  moveTile() {
+    if (this.y < height + this.tileHeight) {
+      this.y ++;
+    }
+  }
+
+  keyPressed() {
+    if (key === "f") {
+      
+    }
+    if (key === "g") {
+      
+    }
+    if (key === "h") {
+      
+    }
+    if (key === "j") {
+      
+    }
   }
 
   checkHit() {
@@ -158,11 +157,12 @@ class TapTile {
 }
 
 class HoldTile {
-  constructor() {
-    this.x;
-    this.y;
-
+  constructor(tileLength) {
+    this.tileHeight = tileLength;
+    this.x = x;
+    this.y = 0 - this.tileHeight;
   }
+
 
   // Can use keyIsPressed for this? 
 }
