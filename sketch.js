@@ -5,10 +5,6 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-// const NUM_OF_COLS = 4;
-// const NUM_OF_ROWS = 20;
-// let numOfRows;
-// let grid;
 const CELL_SIZE = 127;
 const TILE_HEIGHT = 60;
 
@@ -16,17 +12,19 @@ let screenState = "play";
 let selection;
 let songList; 
 let level;
+let score = 0;
+
+let tile;
+let tile2;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   numOfRows = height/CELL_SIZE;
-  
-  // grid = new Grid(NUM_OF_COLS, numOfRows);
-  // gridArray = grid.generate();
 
   songList = loadStrings("songs.txt");
 
-  tile = new TapTile(0);
+  // tile = new TapTile(0);
+  // tile2 = new HoldTile(1, 3);
 }
 
 function draw() {
@@ -37,16 +35,20 @@ function draw() {
   else if (screenState === "selection") {
     background(100);
     displaySelectionScreen();
+
+    // Load song
+    level = loadStrings(`${songList[selection]}.txt`);
   }
   else if (screenState === "play") {
     background(200);
     displayGrid();
 
-    tile.move();
-    tile.display();
+    // Test tiles
+    // tile.move();
+    // tile.display();
 
-    // grid.display(gridArray);
-    // loadSong();
+    // tile2.move();
+    // tile2.display();
   }
   else if (screenState === "score") {
     background(255);
@@ -73,16 +75,6 @@ function displaySelectionScreen() {
   }
 }
 
-function loadSong() {
-  if (selection === 0) {
-    // Load song and map
-    level = loadStrings(`${songList[choice]}.txt`);
-  }
-  else if (selection === 1) { //And so on
-
-  }
-}
-
 function displayGrid() {
   noStroke();
   fill(255);
@@ -102,8 +94,10 @@ function displayGrid() {
 }
 
 function keyPressed() {
+  let smth = checkHit();
   if (key === "f") {
-    tile.checkHit(dist(tile.x, tile.y, width/2 - CELL_SIZE*2, height - height/8)); //If it'll be in array, this will be easier --> Store values
+    // tile.checkHit(dist(tile.x, tile.y, width/2 - CELL_SIZE*2, height - height/8)); //If it'll be in array, this will be easier --> Store values
+    score += 100;
   }
   if (key === "g") {
     
@@ -121,73 +115,53 @@ function displayScore() {
   // But what if you just update a file to keep top 10?
 }
 
-// class Grid {
-//   constructor(cols, rows) {
-//     this.cols = cols;
-//     this.rows = rows;
-//     // this.cellHeight = 40; 
-//   }
-
-//   generate() {
-//     let newGrid = [];
-
-//     for (let x = 0; x < this.cols; x++) {
-//       newGrid.push([]);
-//       for (let y = 0; y < this.rows; y++) {
-//         newGrid[x].push(0);
-//       }
-//     }
-//     return newGrid;
-//   }
-
-//   display() {
-//     noStroke();
-//     rect(width/2 - CELL_SIZE*2, 0, CELL_SIZE * 4, height);
-
-//     for (let i = 0; i < 5; i++) {
-//       strokeWeight(1);
-//       stroke(200);
-//       line(i * CELL_SIZE + (width/2 - CELL_SIZE*2), 0, i * CELL_SIZE + (width/2 - CELL_SIZE*2), height);
-//     }
-
-//     // Draw the target line --> Maybe change to something that looks nicer
-//     strokeWeight(3);
-//     stroke(0);
-//     rect(width/2 - CELL_SIZE*2, height - height/8, CELL_SIZE * 4, 60); //Try to remove the number
-//   }
-// }
-
-class TapTile {
+class Tile {
   constructor(column) {
+    // this.tileSize = CELL_SIZE - 5; Maybe make tiles a bit thinner?
     this.x = column * CELL_SIZE + (width/2 - CELL_SIZE*2);
-    this.y = 0 - TILE_HEIGHT;
   }
 
   display() {
     strokeWeight(1);
     fill(210);
-    rect(this.x, this.y, CELL_SIZE, TILE_HEIGHT);
   }
 
-  move() {
+  move() { //Maybe change movement later
     if (this.y < height + TILE_HEIGHT) {
       this.y += 6;
     }
   }
 
-  checkHit(distance) {
+  checkHit(distance) { //?
     if (distance < 10) {
       text("Amazing!", width/2, height/3);
     }
   }
 }
 
-class HoldTile {
-  constructor(tileLength) {
-    this.tileHeight = tileLength;
-    this.x = x;
+class TapTile  extends Tile {
+  constructor(column) {
+    super(column);
+    this.y = 0 - TILE_HEIGHT;
+  }
+
+  display() {
+    super.display();
+    rect(this.x, this.y, CELL_SIZE, TILE_HEIGHT);
+  }
+}
+
+class HoldTile extends Tile {
+  constructor(column, tileLength) {
+    super(column);
+    this.tileHeight = TILE_HEIGHT*tileLength;
     this.y = 0 - this.tileHeight;
   }
 
-  // Can use keyIsPressed for this? 
+  display() {
+    super.display();
+    rect(this.x, this.y, CELL_SIZE, this.tileHeight);
+  }
+
+  // Can use keyIsPressed for this? or keyIsDown
 }
