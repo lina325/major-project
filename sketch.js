@@ -14,8 +14,16 @@ let songList;
 let level;
 let score = 0;
 
+let chkChkBoom;
+let sleepwalk;
+
 let tile;
 let tile2;
+
+function preload() {
+  chkChkBoom = loadSound();
+  sleepwalk = loadSound();
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -42,6 +50,8 @@ function draw() {
   else if (screenState === "play") {
     background(200);
     displayGrid();
+
+    playMusic();
 
     // Test tiles
     // tile.move();
@@ -90,23 +100,39 @@ function displayGrid() {
   strokeWeight(3);
   stroke(0);
   rect(width/2 - CELL_SIZE*2, height - height/8, CELL_SIZE * 4, TILE_HEIGHT); 
-
 }
 
-function keyPressed() {
-  let smth = checkHit();
-  if (key === "f") {
-    // tile.checkHit(dist(tile.x, tile.y, width/2 - CELL_SIZE*2, height - height/8)); //If it'll be in array, this will be easier --> Store values
-    score += 100;
+function playMusic() {
+  if (selection === 0) {
+    chkChkBoom.play();
   }
-  if (key === "g") {
-    
+}
+
+function keyPressed() { //Possible to combine the two types of tile checks?
+  let distFromLine = checkHit(dist(tile.x, tile.y, width/2 - CELL_SIZE*2 + CELL_SIZE*column, height - height/8)); //Have to consider all columns
+  if (key === "f" || key === "g" || key === "h" || key === "j") {
+    if (distFromLine === "amazing") {
+      score += 100;
+    }
+    else if (distFromLine === "great") {
+      score += 80;
+    }
+    else if (distFromLine === "nice") {
+      score += 60;
+    }
+    else if (distFromLine === "good") {
+      score += 40;
+    }
   }
-  if (key === "h") {
-    
-  }
-  if (key === "j") {
-    
+}
+
+function updateScore() {
+  let topScores = loadStrings("top-scores.txt");
+  for (let aScore of topScores) {
+    if (score > aScore) {
+      aScore = score; //Editing txt file
+    }
+
   }
 }
 
@@ -132,9 +158,26 @@ class Tile {
     }
   }
 
-  checkHit(distance) { //?
+  checkHit(distance) {
     if (distance < 10) {
       text("Amazing!", width/2, height/3);
+      return "amazing";
+    }
+    else if (distance < 15) {
+      text("Great!", width/2, height/3);
+      return "great";
+    }
+    else if (distance < 20) {
+      text("Nice", width/2, height/3);
+      return "nice";
+    }
+    else if (distance < 25) {
+      text("Good", width/2, height/3);
+      return "good";
+    }
+    else {
+      text("Miss", width/2, height/3);
+      return "miss";
     }
   }
 }
