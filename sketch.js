@@ -17,22 +17,16 @@ let score = 0;
 let chkChkBoom;
 let sleepwalk;
 
-let tile;
-let tile2;
-
-function preload() {
-  chkChkBoom = loadSound();
-  sleepwalk = loadSound();
-}
+// function preload() {
+//   chkChkBoom = loadSound();
+//   sleepwalk = loadSound();
+// }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   numOfRows = height/CELL_SIZE;
 
   songList = loadStrings("songs.txt");
-
-  // tile = new TapTile(0);
-  // tile2 = new HoldTile(1, 3);
 }
 
 function draw() {
@@ -44,21 +38,14 @@ function draw() {
     background(100);
     displaySelectionScreen();
 
-    // Load song
-    level = loadStrings(`${songList[selection]}.txt`);
+    level = loadLevel();
   }
   else if (screenState === "play") {
     background(200);
+    // playMusic();
+
     displayGrid();
-
-    playMusic();
-
-    // Test tiles
-    // tile.move();
-    // tile.display();
-
-    // tile2.move();
-    // tile2.display();
+    // displayLevel();
   }
   else if (screenState === "score") {
     background(255);
@@ -67,7 +54,7 @@ function draw() {
 }
 
 function displayStartScreen() {
-
+  // Button for start + look into smth more interesting than a solid bg
 }
 
 function displaySelectionScreen() {
@@ -82,6 +69,36 @@ function displaySelectionScreen() {
   else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height && mouseIsPressed) {
     selection = 1;
     screenState = "play";
+  }
+}
+
+function loadLevel() {
+  level = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
+  let tiles = [];
+  let someTile;
+
+  for (let i = 0; i < level.length; i++) {
+    tiles.push([]);
+    for (let j = 0; j < level[i].length; j++) {
+      if (level[i][j] === "t") {
+        someTile = new TapTile(j);
+      }
+      else {
+        someTile = 0;
+      }
+      tiles[i].push(someTile);
+    }
+  }
+
+  return tiles;
+}
+
+function playMusic() {
+  if (selection === 0) {
+    chkChkBoom.play();
+  }
+  else if (selection === 1) {
+    sleepwalk.play();
   }
 }
 
@@ -102,14 +119,18 @@ function displayGrid() {
   rect(width/2 - CELL_SIZE*2, height - height/8, CELL_SIZE * 4, TILE_HEIGHT); 
 }
 
-function playMusic() {
-  if (selection === 0) {
-    chkChkBoom.play();
+function displayLevel() {
+  for (let i = 0; i < level.length; i ++) {
+    for (let j = 0; j < level[i].length; j++) {
+      if (level[i][j] !== 0) {
+        level[i][j].display();
+      }
+    }
   }
 }
 
 function keyPressed() { //Possible to combine the two types of tile checks?
-  let distFromLine = checkHit(dist(tile.x, tile.y, width/2 - CELL_SIZE*2 + CELL_SIZE*column, height - height/8)); //Have to consider all columns
+  // let distFromLine = checkHit(dist(tile.x, tile.y, width/2 - CELL_SIZE*2 + CELL_SIZE*column, height - height/8)); //Have to consider all columns
   if (key === "f" || key === "g" || key === "h" || key === "j") {
     if (distFromLine === "amazing") {
       score += 100;
@@ -182,7 +203,7 @@ class Tile {
   }
 }
 
-class TapTile  extends Tile {
+class TapTile extends Tile {
   constructor(column) {
     super(column);
     this.y = 0 - TILE_HEIGHT;
