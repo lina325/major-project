@@ -8,7 +8,7 @@
 const CELL_SIZE = 127;
 const TILE_HEIGHT = 60;
 
-let screenState = "play";
+let screenState = "selection";
 let selection;
 let songList; 
 let level;
@@ -16,6 +16,9 @@ let score = 0;
 
 let chkChkBoom;
 let sleepwalk;
+
+let array;
+let tile;
 
 // function preload() {
 //   chkChkBoom = loadSound();
@@ -27,6 +30,8 @@ function setup() {
   numOfRows = height/CELL_SIZE;
 
   songList = loadStrings("songs.txt");
+
+  tile = new Tile(0);
 }
 
 function draw() {
@@ -37,8 +42,6 @@ function draw() {
   else if (screenState === "selection") {
     background(100);
     displaySelectionScreen();
-
-    level = loadLevel();
   }
   else if (screenState === "play") {
     background(200);
@@ -46,6 +49,9 @@ function draw() {
 
     displayGrid();
     // displayLevel();
+
+    tile.move();
+    tile.display();
   }
   else if (screenState === "score") {
     background(255);
@@ -62,31 +68,35 @@ function displaySelectionScreen() {
   text("Placeholder", width/4, height/2);
   text("Placeholder", width/4 * 3, height/2);
 
-  if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height && mouseIsPressed) {
-    selection = 0;
-    screenState = "play";
-  }
-  else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height && mouseIsPressed) {
-    selection = 1;
+  if (mouseIsPressed) {
+    if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
+      selection = 0;
+    }
+    else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
+      selection = 1;
+    }
+    level = loadLevel();
     screenState = "play";
   }
 }
 
 function loadLevel() {
-  level = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
+  let array = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
   let tiles = [];
   let someTile;
 
-  for (let i = 0; i < level.length; i++) {
-    tiles.push([]);
-    for (let j = 0; j < level[i].length; j++) {
-      if (level[i][j] === "t") {
+  for (let i = 0; i < array.length; i++) {
+    for (let j = 0; j < array[i].length; j++) {
+      if (array[i][j] === "t") {
         someTile = new TapTile(j);
+      }
+      else if (array[i][j] === Number) {
+        someTile = new HoldTile(j, array[i][j]);
       }
       else {
         someTile = 0;
       }
-      tiles[i].push(someTile);
+      tiles.push(someTile);
     }
   }
 
@@ -120,9 +130,10 @@ function displayGrid() {
 }
 
 function displayLevel() {
-  for (let i = 0; i < level.length; i ++) {
+  for (let i = 0; i < level.length; i++) {
     for (let j = 0; j < level[i].length; j++) {
       if (level[i][j] !== 0) {
+        level[i][j].move();
         level[i][j].display();
       }
     }
