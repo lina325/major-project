@@ -8,8 +8,8 @@
 const CELL_SIZE = 127;
 const TILE_HEIGHT = 60;
 
-let screenState = "selection";
-let selection;
+let screenState = "play";
+let selection = 0;
 let songList; 
 let level;
 let score = 0;
@@ -31,7 +31,7 @@ function setup() {
 
   songList = loadStrings("songs.txt");
 
-  tile = new Tile(0);
+  tile = new TapTile(0);
 }
 
 function draw() {
@@ -46,9 +46,10 @@ function draw() {
   else if (screenState === "play") {
     background(200);
     // playMusic();
+    level = loadLevel();
 
     displayGrid();
-    // displayLevel();
+    displayLevel();
 
     tile.move();
     tile.display();
@@ -65,7 +66,7 @@ function displayStartScreen() {
 
 function displaySelectionScreen() {
   // Set images and text overtop
-  text("Placeholder", width/4, height/2);
+  text("Chk Chk Boom", width/4, height/2); //Maybe use loop/restructure later
   text("Placeholder", width/4 * 3, height/2);
 
   if (mouseIsPressed) {
@@ -75,32 +76,58 @@ function displaySelectionScreen() {
     else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
       selection = 1;
     }
-    level = loadLevel();
+    // level = loadLevel();
     screenState = "play";
   }
 }
 
 function loadLevel() {
-  let array = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
-  let tiles = [];
-  let someTile;
+  array = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
+  let cols = 4;
+  let rows = array.length;
+
+  array = tranferTo2DArray(rows, cols);
+  let tiles;
 
   for (let i = 0; i < array.length; i++) {
     for (let j = 0; j < array[i].length; j++) {
       if (array[i][j] === "t") {
         someTile = new TapTile(j);
       }
-      else if (array[i][j] === Number) {
-        someTile = new HoldTile(j, array[i][j]);
-      }
-      else {
-        someTile = 0;
-      }
+      // else if (array[i][j] === Number) { //Different way to do hold tiles 
+      //   someTile = new HoldTile(j, array[i][j]);
+      // }
+      // else {
+      //   someTile = 0;
+      // }
       tiles.push(someTile);
     }
   }
 
   return tiles;
+}
+
+function tranferTo2DArray(rows, cols) {
+  let newArray = createEmpty2DArray(rows, cols);
+
+  for (let i = 0; i < array.length; i++) {
+    for (let j = 0; j < array[i].length; j++) {
+      if (array[i][j] === "t") {
+        newArray[i][j] === "t";
+      }
+    }
+  }
+}
+
+function createEmpty2DArray(rows, cols) {
+  let array = [];
+
+  for (let i = 0; i < rows; i++) {
+    array.push([]);
+    for (let j = 0; j < cols; j ++) {
+      array.push(0);
+    }
+  }
 }
 
 function playMusic() {
@@ -141,7 +168,8 @@ function displayLevel() {
 }
 
 function keyPressed() { //Possible to combine the two types of tile checks?
-  // let distFromLine = checkHit(dist(tile.x, tile.y, width/2 - CELL_SIZE*2 + CELL_SIZE*column, height - height/8)); //Have to consider all columns
+  let distFromLine = checkHit(dist(tile.x, tile.y, width/2 - CELL_SIZE*2 + CELL_SIZE*column, height - height/8)); //Have to consider all columns
+
   if (key === "f" || key === "g" || key === "h" || key === "j") {
     if (distFromLine === "amazing") {
       score += 100;
@@ -155,6 +183,29 @@ function keyPressed() { //Possible to combine the two types of tile checks?
     else if (distFromLine === "good") {
       score += 40;
     }
+  }
+}
+
+function checkHit(distance) {
+  if (distance < 10) {
+    text("Amazing!", width/2, height/3);
+    return "amazing";
+  }
+  else if (distance < 15) {
+    text("Great!", width/2, height/3);
+    return "great";
+  }
+  else if (distance < 20) {
+    text("Nice", width/2, height/3);
+    return "nice";
+  }
+  else if (distance < 25) {
+    text("Good", width/2, height/3);
+    return "good";
+  }
+  else {
+    text("Miss", width/2, height/3);
+    return "miss";
   }
 }
 
@@ -187,29 +238,6 @@ class Tile {
   move() { //Maybe change movement later
     if (this.y < height + TILE_HEIGHT) {
       this.y += 6;
-    }
-  }
-
-  checkHit(distance) {
-    if (distance < 10) {
-      text("Amazing!", width/2, height/3);
-      return "amazing";
-    }
-    else if (distance < 15) {
-      text("Great!", width/2, height/3);
-      return "great";
-    }
-    else if (distance < 20) {
-      text("Nice", width/2, height/3);
-      return "nice";
-    }
-    else if (distance < 25) {
-      text("Good", width/2, height/3);
-      return "good";
-    }
-    else {
-      text("Miss", width/2, height/3);
-      return "miss";
     }
   }
 }
