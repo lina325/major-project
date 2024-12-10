@@ -20,10 +20,10 @@ let sleepwalk;
 let array;
 let tile;
 
-// function preload() {
-//   chkChkBoom = loadSound();
-//   sleepwalk = loadSound();
-// }
+function preload() {
+  chkChkBoom = loadSound("chk-chk-boom.mp3");
+  sleepwalk = loadSound("sleepwalk.mp3");
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -45,18 +45,19 @@ function draw() {
   }
   else if (screenState === "play") {
     background(200);
-    // playMusic();
-    level = loadLevel();
+    playMusic();
+    loadLevel();
 
     displayGrid();
     displayLevel();
 
-    tile.move();
-    tile.display();
+    // tile.move();
+    // tile.display();
   }
   else if (screenState === "score") {
     background(255);
     displayScore();
+    updateScores();
   }
 }
 
@@ -81,17 +82,22 @@ function displaySelectionScreen() {
   }
 }
 
+let transferredArray; //Temporary
+let tiles;
+
 function loadLevel() {
   array = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
+
   let cols = 4;
   let rows = array.length;
+  transferredArray = createEmpty2DArray(rows, cols); 
+  transferredArray = tranferTo2DArray(rows, cols, array); //why is it empty lol
 
-  array = tranferTo2DArray(rows, cols);
-  let tiles;
+  tiles = [];
 
-  for (let i = 0; i < array.length; i++) {
-    for (let j = 0; j < array[i].length; j++) {
-      if (array[i][j] === "t") {
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (transferredArray[i][j] === "t") {
         someTile = new TapTile(j);
       }
       // else if (array[i][j] === Number) { //Different way to do hold tiles 
@@ -104,33 +110,32 @@ function loadLevel() {
     }
   }
 
-  return tiles;
+  level = tiles;
 }
 
-function tranferTo2DArray(rows, cols) {
-  let newArray = createEmpty2DArray(rows, cols);
-
-  for (let i = 0; i < array.length; i++) {
-    for (let j = 0; j < array[i].length; j++) {
-      if (array[i][j] === "t") {
-        newArray[i][j] === "t";
-      }
+function tranferTo2DArray(rows, cols, someArray) {
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      transferredArray[i][j] = someArray[i][j];
     }
   }
 }
 
 function createEmpty2DArray(rows, cols) {
-  let array = [];
+  let newArray = [];
 
   for (let i = 0; i < rows; i++) {
     array.push([]);
     for (let j = 0; j < cols; j ++) {
-      array.push(0);
+      array[i].push(0);
     }
   }
+
+  return newArray;
 }
 
 function playMusic() {
+  // Wait a few seconds before playing music 
   if (selection === 0) {
     chkChkBoom.play();
   }
@@ -209,7 +214,7 @@ function checkHit(distance) {
   }
 }
 
-function updateScore() {
+function updateScores() {
   let topScores = loadStrings("top-scores.txt");
   for (let aScore of topScores) {
     if (score > aScore) {
@@ -220,8 +225,8 @@ function updateScore() {
 }
 
 function displayScore() {
-  // Could use local stoarge 
-  // But what if you just update a file to keep top 10?
+  text("Good Job!", width/2, height/4);
+  text(score, width/2, height/3);
 }
 
 class Tile {
