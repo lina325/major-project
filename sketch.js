@@ -45,7 +45,7 @@ function draw() {
   }
   else if (screenState === "play") {
     background(200);
-    playMusic();
+    // playMusic();
     loadLevel();
 
     displayGrid();
@@ -68,7 +68,7 @@ function displayStartScreen() {
 function displaySelectionScreen() {
   // Set images and text overtop
   text("Chk Chk Boom", width/4, height/2); //Maybe use loop/restructure later
-  text("Placeholder", width/4 * 3, height/2);
+  text("Sleepwalk", width/4 * 3, height/2);
 
   if (mouseIsPressed) {
     if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
@@ -88,16 +88,19 @@ let tiles;
 function loadLevel() {
   array = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
 
-  let cols = 4;
-  let rows = array.length;
-  transferredArray = createEmpty2DArray(rows, cols); 
-  transferredArray = tranferTo2DArray(rows, cols, array); //why is it empty lol
+  // transferredArray = createEmpty2DArray(array.length, 4); 
+  // for (let i = 0; i < array.length; i++) {
+  //   for (let j = 0; j < 4; j++) {
+  //     transferredArray[i][j] = array[i][j];
+  //   }
+  // }
 
   tiles = [];
 
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      if (transferredArray[i][j] === "t") {
+  for (let i = 0; i < array.length; i++) {
+    for (let j = 0; j < array[i].length; j++) {
+      if (array[i][j] === "t") {
+        // Maybe store the properties instead? 
         someTile = new TapTile(j);
       }
       // else if (array[i][j] === Number) { //Different way to do hold tiles 
@@ -227,6 +230,13 @@ function updateScores() {
 function displayScore() {
   text("Good Job!", width/2, height/4);
   text(score, width/2, height/3);
+
+  // Button to go back to selection?
+  rect(width/2 - 30, height/7 * 5 - 15, 60, 30);
+  // text on button
+  if (mouseX > width/2 - 30 && mouseX < width/2 + 30 && mouseY > height/7 * 5 - 15 && mouseY < height/7 * 5 + 15 && mouseIsPressed) {
+    screenState = "selection";
+  }
 }
 
 class Tile {
