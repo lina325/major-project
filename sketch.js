@@ -49,7 +49,7 @@ function draw() {
     loadLevel();
 
     displayGrid();
-    displayLevel();
+    // displayLevel();
 
     // tile.move();
     // tile.display();
@@ -84,34 +84,40 @@ function displaySelectionScreen() {
 
 let transferredArray; //Temporary
 let tiles;
+let randomArray;
 
 function loadLevel() {
-  array = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
+  let levelToLoad = `${songList[selection]}.txt`;
+  array = loadStrings(levelToLoad); //Maybe can turn this into a local variable 
 
-  // transferredArray = createEmpty2DArray(array.length, 4); 
-  // for (let i = 0; i < array.length; i++) {
-  //   for (let j = 0; j < 4; j++) {
-  //     transferredArray[i][j] = array[i][j];
+  let rows = array.length;
+  let cols = 4;
+
+  transferredArray = createEmpty2DArray(rows, cols); 
+  
+  // for (let i = 0; i < rows; i++) {
+  //   for (let j = 0; j < cols; j++) {
+  //     transferredArray[i][j];
   //   }
   // }
 
   tiles = [];
 
-  for (let i = 0; i < array.length; i++) {
-    for (let j = 0; j < array[i].length; j++) {
-      if (array[i][j] === "t") {
-        // Maybe store the properties instead? 
-        someTile = new TapTile(j);
-      }
-      // else if (array[i][j] === Number) { //Different way to do hold tiles 
-      //   someTile = new HoldTile(j, array[i][j]);
-      // }
-      // else {
-      //   someTile = 0;
-      // }
-      tiles.push(someTile);
-    }
-  }
+  // for (let i = 0; i < array.length; i++) {
+  //   for (let j = 0; j < array[i].length; j++) {
+  //     if (array[i][j] === "t") {
+  //       // Maybe store the properties instead? 
+  //       someTile = new TapTile(j);
+  //     }
+  //     else if (array[i][j] === Number) { //Different way to do hold tiles 
+  //       someTile = new HoldTile(j, array[i][j]);
+  //     }
+  //     else {
+  //       someTile = 0;
+  //     }
+  //     tiles.push(someTile);
+  //   }
+  // }
 
   level = tiles;
 }
@@ -128,9 +134,9 @@ function createEmpty2DArray(rows, cols) {
   let newArray = [];
 
   for (let i = 0; i < rows; i++) {
-    array.push([]);
+    newArray.push([]);
     for (let j = 0; j < cols; j ++) {
-      array[i].push(0);
+      newArray[i].push(0);
     }
   }
 
