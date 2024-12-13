@@ -8,26 +8,34 @@
 const CELL_SIZE = 127;
 const TILE_HEIGHT = 60;
 
-let screenState = "play";
-let selection = 0;
+let screenState = "selection";
+let selection;
 let songList; 
 let level;
 let score = 0;
 
+let imageSize;
+  
 let chkChkBoom;
 let sleepwalk;
 
+//temporary
 let array;
 let tile;
 
 function preload() {
   chkChkBoom = loadSound("chk-chk-boom.mp3");
   sleepwalk = loadSound("sleepwalk.mp3");
+
+  skz = loadImage("skz.png");
+  sleepwalkMVImage = loadImage("sleepwalk.png");
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   numOfRows = height/CELL_SIZE;
+  
+  imageSize = width/2;
 
   songList = loadStrings("songs.txt");
 
@@ -66,10 +74,38 @@ function displayStartScreen() {
 }
 
 function displaySelectionScreen() {
-  // Set images and text overtop
+  let distance; 
+
+  // Expand images if mouse is on/near
+  if (mouseX > 0 && mouseX < width/2 - 5 && mouseY > 0 && mouseY < height) {
+    distance = dist(mouseX, mouseY, width/4, height/2);
+  }
+  else if (mouseX > width/2 + 5 && mouseX < width && mouseY > 0 && mouseY < height) {
+    distance = dist(mouseX, mouseY, width/4 * 3, height/2);
+  }
+
+  if (distance < width/4) {
+    imageSize = map(imageSize, 0, width/2, 0, width);
+  }
+  else {
+    imageSize = width/2;
+  }
+
+  // Display images
+  image(skz, 0, 0, imageSize, height, 0, 0, imageSize, height, COVER);
+
+  // Darken images
+  fill(0, 0, 0, 200);
+  rect(0, 0, imageSize, height);
+
+  // Text
+  textSize(30);
+  fill(245);
+  textAlign(CENTER);
   text("Chk Chk Boom", width/4, height/2); //Maybe use loop/restructure later
   text("Sleepwalk", width/4 * 3, height/2);
 
+  // Selection
   if (mouseIsPressed) {
     if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
       selection = 0;
