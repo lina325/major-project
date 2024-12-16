@@ -15,6 +15,8 @@ let level;
 let score = 0;
 
 let imageSize;
+let skz;
+let sleepwalkMVImage;
   
 let chkChkBoom;
 let sleepwalk;
@@ -38,6 +40,8 @@ function setup() {
   imageSize = width/2;
 
   songList = loadStrings("songs.txt");
+
+  textAlign(CENTER);
 
   tile = new TapTile(0);
 }
@@ -77,10 +81,10 @@ function displaySelectionScreen() {
   let distance; 
 
   // Expand images if mouse is on/near
-  if (mouseX > 0 && mouseX < width/2 - 5 && mouseY > 0 && mouseY < height) {
+  if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
     distance = dist(mouseX, mouseY, width/4, height/2);
   }
-  else if (mouseX > width/2 + 5 && mouseX < width && mouseY > 0 && mouseY < height) {
+  else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
     distance = dist(mouseX, mouseY, width/4 * 3, height/2);
   }
 
@@ -93,15 +97,15 @@ function displaySelectionScreen() {
 
   // Display images
   image(skz, 0, 0, imageSize, height, 0, 0, imageSize, height, COVER);
+  image(sleepwalkMVImage, width/2, 0, imageSize, height, sleepwalkMVImage.width/2, 0, sleepwalkMVImage.width/2, sleepwalkMVImage.height, COVER);
 
   // Darken images
   fill(0, 0, 0, 200);
-  rect(0, 0, imageSize, height);
+  rect(0, 0, width, height);
 
   // Text
   textSize(30);
-  fill(245);
-  textAlign(CENTER);
+  fill(220);
   text("Chk Chk Boom", width/4, height/2); //Maybe use loop/restructure later
   text("Sleepwalk", width/4 * 3, height/2);
 
@@ -275,7 +279,7 @@ function displayScore() {
 
   // Button to go back to selection?
   rect(width/2 - 30, height/7 * 5 - 15, 60, 30);
-  // text on button
+  text("Confirm", width/2 - 30, height/7 * 5 - 15);
   if (mouseX > width/2 - 30 && mouseX < width/2 + 30 && mouseY > height/7 * 5 - 15 && mouseY < height/7 * 5 + 15 && mouseIsPressed) {
     screenState = "selection";
   }
