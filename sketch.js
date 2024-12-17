@@ -54,11 +54,13 @@ function draw() {
   else if (screenState === "selection") {
     background(100);
     displaySelectionScreen();
+
+    // noLoop();
+    // loadLevel();
   }
   else if (screenState === "play") {
     background(200);
     // playMusic();
-    loadLevel();
 
     displayGrid();
     // displayLevel();
@@ -82,21 +84,23 @@ function displaySelectionScreen() {
 
   // Expand images if mouse is on/near
   if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
+    // imageSize = map(imageSize, 0, width/2, 0, width);
     distance = dist(mouseX, mouseY, width/4, height/2);
   }
   else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
+    // imageSize = map(imageSize, 0, width/2, 0, width);
     distance = dist(mouseX, mouseY, width/4 * 3, height/2);
   }
 
   if (distance < width/4) {
-    imageSize = map(imageSize, 0, width/2, 0, width);
+    // imageSize = map(imageSize, 0, width/2, 0, width);
   }
   else {
     imageSize = width/2;
   }
 
   // Display images
-  image(skz, 0, 0, imageSize, height, 0, 0, imageSize, height, COVER);
+  image(skz, 0, 0, imageSize, height, 0, 0, width, height, COVER);
   image(sleepwalkMVImage, width/2, 0, imageSize, height, sleepwalkMVImage.width/2, 0, sleepwalkMVImage.width/2, sleepwalkMVImage.height, COVER);
 
   // Darken images
@@ -117,7 +121,7 @@ function displaySelectionScreen() {
     else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
       selection = 1;
     }
-    // level = loadLevel();
+    // loadLevel();
     screenState = "play";
   }
 }
@@ -127,19 +131,19 @@ let tiles;
 let randomArray;
 
 function loadLevel() {
-  let levelToLoad = `${songList[selection]}.txt`;
-  array = loadStrings(levelToLoad); //Maybe can turn this into a local variable 
+  array = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
 
-  let rows = array.length;
+  let rows = 18;
   let cols = 4;
 
   transferredArray = createEmpty2DArray(rows, cols); 
   
-  // for (let i = 0; i < rows; i++) {
-  //   for (let j = 0; j < cols; j++) {
-  //     transferredArray[i][j];
-  //   }
-  // }
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      let value = array[i][j];
+      transferredArray[i][j] = value;
+    }
+  }
 
   tiles = [];
 
