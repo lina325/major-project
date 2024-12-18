@@ -21,8 +21,11 @@ let sleepwalkMVImage;
 let chkChkBoom;
 let sleepwalk;
 
+let level0; 
+let level1;
+let tiles;
+
 //temporary
-let array;
 let tile;
 
 function preload() {
@@ -31,6 +34,10 @@ function preload() {
 
   skz = loadImage("skz.png");
   sleepwalkMVImage = loadImage("sleepwalk.png");
+
+  // Preload all levels
+  level0 = loadStrings("chk-chk-boom.txt");
+  level1 = loadStrings("sleepwalk.txt");
 }
 
 function setup() {
@@ -126,17 +133,18 @@ function displaySelectionScreen() {
   }
 }
 
-let transferredArray; //Temporary
-let tiles;
-let randomArray;
-
 function loadLevel() {
-  array = loadStrings(`${songList[selection]}.txt`); //Maybe can turn this into a local variable 
-
-  let rows = 18;
+  let rows;
   let cols = 4;
 
-  transferredArray = createEmpty2DArray(rows, cols); 
+  if (selection === 0) {
+    rows = level0.length;
+  }
+  else if (selection === 1) {
+    rows = level1.length;
+  }
+  
+  tiles = createEmpty2DArray(rows, cols);
   
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
@@ -144,8 +152,6 @@ function loadLevel() {
       transferredArray[i][j] = value;
     }
   }
-
-  tiles = [];
 
   // for (let i = 0; i < array.length; i++) {
   //   for (let j = 0; j < array[i].length; j++) {
