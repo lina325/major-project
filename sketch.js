@@ -13,6 +13,7 @@ let selection;
 let songList; 
 let level;
 let score = 0;
+let highScore;
 
 let imageSize;
 let skz;
@@ -50,6 +51,10 @@ function setup() {
 
   textAlign(CENTER);
 
+  if (getItem("highscore")) {
+    highScore = getItem("highscore");
+  }
+
   tile = new TapTile(0);
 }
 
@@ -70,7 +75,7 @@ function draw() {
     // playMusic();
 
     displayGrid();
-    // displayLevel();
+    // playLevel();
 
     // tile.move();
     // tile.display();
@@ -88,27 +93,35 @@ function displayStartScreen() {
 
 function displaySelectionScreen() {
   let distance; 
+  let image1Size = width/2;
+  let image2Size = width/2;
 
   // Expand images if mouse is on/near
   if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
-    // imageSize = map(imageSize, 0, width/2, 0, width);
-    distance = dist(mouseX, mouseY, width/4, height/2);
+    if (image1Size <= width) {
+      image1Size = map(image1Size, 0, width/2, 0, width); //Need to make it gradual 
+      image2Size -= 8;
+    }
+    // distance = dist(mouseX, mouseY, width/4, height/2);
   }
   else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
-    // imageSize = map(imageSize, 0, width/2, 0, width);
-    distance = dist(mouseX, mouseY, width/4 * 3, height/2);
+    if (image2Size <= width) {
+      image2Size += 8;
+      image1Size -= 8;
+    }
+    // distance = dist(mouseX, mouseY, width/4 * 3, height/2);
   }
 
-  if (distance < width/4) {
-    // imageSize = map(imageSize, 0, width/2, 0, width);
-  }
-  else {
-    imageSize = width/2;
-  }
+  // if (distance < width/4) {
+  //   // imageSize = map(imageSize, 0, width/2, 0, width);
+  // }
+  // else {
+  //   imageSize = width/2;
+  // }
 
   // Display images
-  image(skz, 0, 0, imageSize, height, 0, 0, width, height, COVER);
-  image(sleepwalkMVImage, width/2, 0, imageSize, height, sleepwalkMVImage.width/2, 0, sleepwalkMVImage.width/2, sleepwalkMVImage.height, COVER);
+  image(skz, 0, 0, image1Size, height, 0, 0, skz.width/2, skz.height, COVER);
+  image(sleepwalkMVImage, width/2, 0, image2Size, height, sleepwalkMVImage.width/2, 0, sleepwalkMVImage.width/2, sleepwalkMVImage.height, COVER);
 
   // Darken images
   fill(0, 0, 0, 200);
@@ -138,9 +151,11 @@ function loadLevel() {
   let cols = 4;
 
   if (selection === 0) {
+    array = level0;
     rows = level0.length;
   }
   else if (selection === 1) {
+    array = level1;
     rows = level1.length;
   }
   
@@ -149,7 +164,7 @@ function loadLevel() {
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       let value = array[i][j];
-      transferredArray[i][j] = value;
+      tiles[i][j] = value;
     }
   }
 
@@ -172,13 +187,13 @@ function loadLevel() {
   level = tiles;
 }
 
-function tranferTo2DArray(rows, cols, someArray) {
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      transferredArray[i][j] = someArray[i][j];
-    }
-  }
-}
+// function tranferTo2DArray(rows, cols, someArray) {
+//   for (let i = 0; i < rows; i++) {
+//     for (let j = 0; j < cols; j++) {
+//       tiles[i][j] = someArray[i][j];
+//     }
+//   }
+// }
 
 function createEmpty2DArray(rows, cols) {
   let newArray = [];
@@ -194,13 +209,15 @@ function createEmpty2DArray(rows, cols) {
 }
 
 function playMusic() {
-  // Wait a few seconds before playing music 
-  if (selection === 0) {
-    chkChkBoom.play();
-  }
-  else if (selection === 1) {
-    sleepwalk.play();
-  }
+  // Wait a few seconds before playing music --> Test
+  setTimeout(() => {
+    if (selection === 0) {
+      chkChkBoom.play();
+    }
+    else if (selection === 1) {
+      sleepwalk.play();
+    }
+  }, 3000);
 }
 
 function displayGrid() {
@@ -220,52 +237,53 @@ function displayGrid() {
   rect(width/2 - CELL_SIZE*2, height - height/8, CELL_SIZE * 4, TILE_HEIGHT); 
 }
 
-function displayLevel() {
+function playLevel() {
   for (let i = 0; i < level.length; i++) {
     for (let j = 0; j < level[i].length; j++) {
       if (level[i][j] !== 0) {
         level[i][j].move();
         level[i][j].display();
+
+        // Check each tile 
+        let distFromLine = checkHit(dist(level[i][j].x, level[i][j].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i][j].column, height - height/8)); 
+
+        // if (key === "f" || key === "g" || key === "h" || key === "j") {
+        if (distFromLine === "amazing") {
+          score += 100;
+        }
+        else if (distFromLine === "great") {
+          score += 80;
+        }
+        else if (distFromLine === "nice") {
+          score += 60;
+        }
+        else if (distFromLine === "good") {
+          score += 40;
+        }
+        // }
       }
     }
   }
 }
 
-function keyPressed() { //Possible to combine the two types of tile checks?
-  let distFromLine = checkHit(dist(tile.x, tile.y, width/2 - CELL_SIZE*2 + CELL_SIZE*column, height - height/8)); //Have to consider all columns
-
-  if (key === "f" || key === "g" || key === "h" || key === "j") {
-    if (distFromLine === "amazing") {
-      score += 100;
-    }
-    else if (distFromLine === "great") {
-      score += 80;
-    }
-    else if (distFromLine === "nice") {
-      score += 60;
-    }
-    else if (distFromLine === "good") {
-      score += 40;
-    }
-  }
-}
-
 function checkHit(distance) {
-  if (distance < 10) {
-    text("Amazing!", width/2, height/3);
-    return "amazing";
-  }
-  else if (distance < 15) {
-    text("Great!", width/2, height/3);
-    return "great";
-  }
-  else if (distance < 20) {
-    text("Nice", width/2, height/3);
-    return "nice";
-  }
-  else if (distance < 25) {
-    text("Good", width/2, height/3);
-    return "good";
+  if (keyIsPressed && (key === "f" || key === "g" || key === "h" || key === "j")) {
+    if (distance < 10) {
+      text("Amazing!", width/2, height/3);
+      return "amazing";
+    }
+    else if (distance < 15 && mouseIsPressed) {
+      text("Great!", width/2, height/3);
+      return "great";
+    }
+    else if (distance < 20 && mouseIsPressed) {
+      text("Nice", width/2, height/3);
+      return "nice";
+    }
+    else if (distance < 25 && mouseIsPressed) {
+      text("Good", width/2, height/3);
+      return "good";
+    }
   }
   else {
     text("Miss", width/2, height/3);
@@ -274,31 +292,43 @@ function checkHit(distance) {
 }
 
 function updateScores() {
-  let topScores = loadStrings("top-scores.txt");
-  for (let aScore of topScores) {
-    if (score > aScore) {
-      aScore = score; //Editing txt file
-    }
+  // let topScores = loadStrings("top-scores.txt");
+  // for (let aScore of topScores) {
+  //   if (score > aScore) {
+  //     aScore = score; //Editing txt file
+  //   }
 
+  // }
+
+  // Local storage method
+  if (score > highScore) {
+    highScore = score;
+    storeItem("highscore", highScore);
   }
 }
 
 function displayScore() {
+  textSize(100);
   text("Good Job!", width/2, height/4);
-  text(score, width/2, height/3);
+
+  textSize(80);
+  text(score, width/2, height/8 * 3);
 
   // Button to go back to selection?
-  rect(width/2 - 30, height/7 * 5 - 15, 60, 30);
-  text("Confirm", width/2 - 30, height/7 * 5 - 15);
-  if (mouseX > width/2 - 30 && mouseX < width/2 + 30 && mouseY > height/7 * 5 - 15 && mouseY < height/7 * 5 + 15 && mouseIsPressed) {
+  rect(width/2 - 300, height/7 * 5 - 50, 600, 100);
+  textSize(30);
+  text("Confirm", width/2, height/7 * 5);
+  if (mouseX > width/2 - 300 && mouseX < width/2 + 300 && mouseY > height/7 * 5 - 50 && mouseY < height/7 * 5 + 50 && mouseIsPressed) {
     screenState = "selection";
+    selection = false;
   }
 }
 
 class Tile {
   constructor(column) {
     // this.tileSize = CELL_SIZE - 5; Maybe make tiles a bit thinner?
-    this.x = column * CELL_SIZE + (width/2 - CELL_SIZE*2);
+    this.column = column;
+    this.x = this.column * CELL_SIZE + (width/2 - CELL_SIZE*2);
   }
 
   display() {

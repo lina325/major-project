@@ -18,7 +18,7 @@ A rhythm game for a few songs that I haven't found good rhythm games for :D
     - At least 2-3 songs [Start with 2]
 - Basic scoring + display at end of each level
     - Display/some kind of signal that the tile was hit
-- Decently visually appealing [Expand later]
+- Decently visually appealing
     - Not just basic colours and elements
     - Title/opening screen and ending/level completion screen along with selection and gameplay screens 
 
