@@ -97,17 +97,24 @@ function displaySelectionScreen() {
   let image2Size = width/2;
 
   // Expand images if mouse is on/near
-  if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
+  if (mouseX > 0 && mouseX < width/2) {
     if (image1Size <= width) {
-      image1Size = map(image1Size, 0, width/2, 0, width); //Need to make it gradual 
-      image2Size -= 8;
+      distance = dist(mouseX, mouseY, width/4, mouseY);
+      if (distance < width/4) {
+        image1Size = map(image1Size, 0, width/2, 0, width); //Need to make it gradual 
+        image2Size -= 8;
+      }
+      else {
+        image1Size = width/2;
+        image2Size = width/2;
+      }
     }
     // distance = dist(mouseX, mouseY, width/4, height/2);
   }
   else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
     if (image2Size <= width) {
-      image2Size += 8;
-      image1Size -= 8;
+      image2Size += map(image2Size, 0, width/2, 0, width);
+      image1Size -= 0;
     }
     // distance = dist(mouseX, mouseY, width/4 * 3, height/2);
   }
@@ -120,7 +127,7 @@ function displaySelectionScreen() {
   // }
 
   // Display images
-  image(skz, 0, 0, image1Size, height, 0, 0, skz.width/2, skz.height, COVER);
+  image(skz, 0, 0, image1Size, height, 0, 0, image1Size, skz.height, COVER);
   image(sleepwalkMVImage, width/2, 0, image2Size, height, sleepwalkMVImage.width/2, 0, sleepwalkMVImage.width/2, sleepwalkMVImage.height, COVER);
 
   // Darken images
@@ -152,7 +159,7 @@ function loadLevel() {
 
   if (selection === 0) {
     array = level0;
-    rows = level0.length;
+    rows = level0.length; //running into issues with length 
   }
   else if (selection === 1) {
     array = level1;
@@ -320,7 +327,7 @@ function displayScore() {
   text("Confirm", width/2, height/7 * 5);
   if (mouseX > width/2 - 300 && mouseX < width/2 + 300 && mouseY > height/7 * 5 - 50 && mouseY < height/7 * 5 + 50 && mouseIsPressed) {
     screenState = "selection";
-    selection = false;
+    selection = "none";
   }
 }
 
@@ -353,6 +360,10 @@ class TapTile extends Tile {
     super.display();
     rect(this.x, this.y, CELL_SIZE, TILE_HEIGHT);
   }
+
+  move() {
+    super.move();
+  }
 }
 
 class HoldTile extends Tile {
@@ -367,5 +378,7 @@ class HoldTile extends Tile {
     rect(this.x, this.y, CELL_SIZE, this.tileHeight);
   }
 
-  // Can use keyIsPressed for this? or keyIsDown
+  move() {
+    super.move();
+  }
 }
