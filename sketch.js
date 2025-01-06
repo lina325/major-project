@@ -15,13 +15,14 @@ let level;
 let score = 0;
 let highScore;
 
-let duck;
 let skz;
 let sleepwalkMVImage;
 let levelBackground;
+
+let duck;
 let dragon;
 let dragonMusic;
-  
+
 let chkChkBoom;
 let sleepwalk;
 
@@ -32,26 +33,26 @@ let i = 0;
 
 
 function preload() {
-  chkChkBoom = loadSound("chk-chk-boom.mp3");
-  sleepwalk = loadSound("sleepwalk.mp3");
-  dragonMusic = loadSound("driftveil-city-music.mp3");
+  chkChkBoom = loadSound("audios/chk-chk-boom.mp3");
+  sleepwalk = loadSound("audios/sleepwalk.mp3");
+  dragonMusic = loadSound("audios/driftveil-city-music.mp3");
 
-  skz = loadImage("skz.png");
-  sleepwalkMVImage = loadImage("sleepwalk.png");
+  skz = loadImage("images/skz.png");
+  sleepwalkMVImage = loadImage("images/sleepwalk.png");
 
-  songList = loadStrings("songs.txt"); //this might be useless now lol
+  songList = loadStrings("txt-files/songs.txt"); //this might be useless now lol
 
-  duck = createVideo(["duck-dance.mp4"]);
-  duck.loop();
-  duck.hide();
+  // duck = createVideo(["duck-dance.mp4"]);
+  // duck.loop();
+  // duck.hide();
 
   dragon = createVideo(["party-dance.mp4"]);
   dragon.loop();
   dragon.hide();
 
   // Load all level txt files
-  level0 = loadStrings("chk-chk-boom.txt");
-  level1 = loadStrings("sleepwalk.txt");
+  level0 = loadStrings("txt-files/chk-chk-boom.txt");
+  level1 = loadStrings("txt-files/sleepwalk.txt");
 
   // Place into array
   levels.push(level0);
@@ -134,7 +135,7 @@ function transferToTilesArray(rows, cols, array) {
 }
 
 function displayStartScreen() {
-  image(duck, width/2 - duck.width/2, 0);
+  // image(duck, width/2 - duck.width/2, 0);
 
   fill(0);
   textSize(120);
@@ -204,12 +205,15 @@ function displaySelectionScreen() {
 function playMusic() {
   if (level === levels[0]) {
     if (!chkChkBoom.isPlaying()) {
-    chkChkBoom.play();
+      chkChkBoom.play();
     }
+    // else if (chkChkBoom.onended()) {
+    //   screenState = "score";
+    // }
   }
   else if (level === levels[1]) {
     if (!sleepwalk.isPlaying()) {
-    sleepwalk.play();
+      sleepwalk.play();
     }
   }
 }
@@ -218,7 +222,7 @@ function displayGrid() {
   image(levelBackground, 0, 0, width, height, 0, 0, levelBackground.width, levelBackground.height, COVER);
 
   // Darken background
-  fill(0, 0, 0, 200)
+  fill(0, 0, 0, 200);
   rect(0, 0, width, height);
 
   noStroke();
@@ -241,49 +245,50 @@ function playLevel() {
   for (let i = 0; i < level.length; i ++) {
     level[i].move();
     level[i].display();
+
+    if ((key === "f" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "j" && level[i].column === 3) && keyIsPressed) {
+      let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
+      checkHit(distFromLine);
+    }
+    else {
+      text("Miss", width/2, height/3);
+      return "miss";
+    }
   }
   i++;
+}
 
-  // Check each tile 
-  // let distFromLine = checkHit(dist(level[i][j].x, level[i][j].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i][j].column, height  - height/8)); 
-
-  // if (key === "f" || key === "g" || key === "h" || key === "j") {
-  // if (distFromLine === "amazing") {
-  //   score += 100;
-  // }
-  // else if (distFromLine === "great") {
-  //   score += 80;
-  // }
-  // else if (distFromLine === "nice") {
-  //   score += 60;
-  // }
-  // else if (distFromLine === "good") {
-  //   score += 40;
-  // }
+function getDistance(distance) {
+  if (distance < 10) {
+    text("Amazing!", width/2, height/3);
+    return "amazing";
+  }
+  else if (distance < 15 && mouseIsPressed) {
+    text("Great!", width/2, height/3);
+    return "great";
+  }
+  else if (distance < 20 && mouseIsPressed) {
+    text("Nice", width/2, height/3);
+    return "nice";
+  }
+  else if (distance < 25 && mouseIsPressed) {
+    text("Good", width/2, height/3);
+    return "good";
+  }
 }
 
 function checkHit(distance) {
-  if (keyIsPressed && (key === "f" || key === "g" || key === "h" || key === "j")) {
-    if (distance < 10) {
-      text("Amazing!", width/2, height/3);
-      return "amazing";
-    }
-    else if (distance < 15 && mouseIsPressed) {
-      text("Great!", width/2, height/3);
-      return "great";
-    }
-    else if (distance < 20 && mouseIsPressed) {
-      text("Nice", width/2, height/3);
-      return "nice";
-    }
-    else if (distance < 25 && mouseIsPressed) {
-      text("Good", width/2, height/3);
-      return "good";
-    }
+  if (distance === "amazing") {
+    score += 100;
   }
-  else {
-    text("Miss", width/2, height/3);
-    return "miss";
+  else if (distance === "great") {
+    score += 80;
+  }
+  else if (distance === "nice") {
+    score += 60;
+  }
+  else if (distance === "good") {
+    score += 40;
   }
 }
 
