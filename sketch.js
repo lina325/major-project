@@ -8,77 +8,94 @@
 const CELL_SIZE = 127;
 const TILE_HEIGHT = 60;
 
-let screenState = "selection";
+let screenState = "start";
 let selection;
 let songList; 
 let level;
 let score = 0;
 let highScore;
 
-let imageSize;
+let duck;
 let skz;
 let sleepwalkMVImage;
+let levelBackground;
+let dragon;
+let dragonMusic;
   
 let chkChkBoom;
 let sleepwalk;
 
+let levels = [];
 let level0; 
 let level1;
-let tiles;
+let i = 0;
 
-//temporary
-let tile;
 
 function preload() {
   chkChkBoom = loadSound("chk-chk-boom.mp3");
   sleepwalk = loadSound("sleepwalk.mp3");
+  dragonMusic = loadSound("driftveil-city-music.mp3");
 
   skz = loadImage("skz.png");
   sleepwalkMVImage = loadImage("sleepwalk.png");
 
-  // Preload all levels
+  songList = loadStrings("songs.txt"); //this might be useless now lol
+
+  duck = createVideo(["duck-dance.mp4"]);
+  duck.loop();
+  duck.hide();
+
+  dragon = createVideo(["party-dance.mp4"]);
+  dragon.loop();
+  dragon.hide();
+
+  // Load all level txt files
   level0 = loadStrings("chk-chk-boom.txt");
   level1 = loadStrings("sleepwalk.txt");
+
+  // Place into array
+  levels.push(level0);
+  levels.push(level1);
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   numOfRows = height/CELL_SIZE;
   
-  imageSize = width/2;
-
-  songList = loadStrings("songs.txt");
-
   textAlign(CENTER);
 
   if (getItem("highscore")) {
     highScore = getItem("highscore");
   }
 
-  tile = new TapTile(0);
+  for (let level of levels) {  
+    let rows = level.length;
+    let cols = 4;
+    
+    let tiles = transferToTilesArray(rows, cols, level);
+
+    levels.shift();
+    levels.push(tiles);
+  }
 }
 
 function draw() {
   if (screenState === "start") {
-    background(50);
+    background(255);
     displayStartScreen();
   }
   else if (screenState === "selection") {
     background(100);
     displaySelectionScreen();
-
-    // noLoop();
-    // loadLevel();
   }
   else if (screenState === "play") {
     background(200);
-    // playMusic();
+    setTimeout(() => {
+      playMusic(); //Change screenstate at end of music
+    }, 2000);
 
     displayGrid();
-    // playLevel();
-
-    // tile.move();
-    // tile.display();
+    playLevel();
   }
   else if (screenState === "score") {
     background(255);
@@ -87,122 +104,7 @@ function draw() {
   }
 }
 
-function displayStartScreen() {
-  // Button for start + look into smth more interesting than a solid bg
-}
-
-function displaySelectionScreen() {
-  let distance; 
-  let image1Size = width/2;
-  let image2Size = width/2;
-
-  // Expand images if mouse is on/near
-  if (mouseX > 0 && mouseX < width/2) {
-    if (image1Size <= width) {
-      distance = dist(mouseX, mouseY, width/4, mouseY);
-      if (distance < width/4) {
-        image1Size = map(image1Size, 0, width/2, 0, width); //Need to make it gradual 
-        image2Size -= 8;
-      }
-      else {
-        image1Size = width/2;
-        image2Size = width/2;
-      }
-    }
-    // distance = dist(mouseX, mouseY, width/4, height/2);
-  }
-  else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
-    if (image2Size <= width) {
-      image2Size += map(image2Size, 0, width/2, 0, width);
-      image1Size -= 0;
-    }
-    // distance = dist(mouseX, mouseY, width/4 * 3, height/2);
-  }
-
-  // if (distance < width/4) {
-  //   // imageSize = map(imageSize, 0, width/2, 0, width);
-  // }
-  // else {
-  //   imageSize = width/2;
-  // }
-
-  // Display images
-  image(skz, 0, 0, image1Size, height, 0, 0, image1Size, skz.height, COVER);
-  image(sleepwalkMVImage, width/2, 0, image2Size, height, sleepwalkMVImage.width/2, 0, sleepwalkMVImage.width/2, sleepwalkMVImage.height, COVER);
-
-  // Darken images
-  fill(0, 0, 0, 200);
-  rect(0, 0, width, height);
-
-  // Text
-  textSize(30);
-  fill(220);
-  text("Chk Chk Boom", width/4, height/2); //Maybe use loop/restructure later
-  text("Sleepwalk", width/4 * 3, height/2);
-
-  // Selection
-  if (mouseIsPressed) {
-    if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
-      selection = 0;
-    }
-    else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
-      selection = 1;
-    }
-    // loadLevel();
-    screenState = "play";
-  }
-}
-
-function loadLevel() {
-  let rows;
-  let cols = 4;
-
-  if (selection === 0) {
-    array = level0;
-    rows = level0.length; //running into issues with length 
-  }
-  else if (selection === 1) {
-    array = level1;
-    rows = level1.length;
-  }
-  
-  tiles = createEmpty2DArray(rows, cols);
-  
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      let value = array[i][j];
-      tiles[i][j] = value;
-    }
-  }
-
-  // for (let i = 0; i < array.length; i++) {
-  //   for (let j = 0; j < array[i].length; j++) {
-  //     if (array[i][j] === "t") {
-  //       // Maybe store the properties instead? 
-  //       someTile = new TapTile(j);
-  //     }
-  //     else if (array[i][j] === Number) { //Different way to do hold tiles 
-  //       someTile = new HoldTile(j, array[i][j]);
-  //     }
-  //     else {
-  //       someTile = 0;
-  //     }
-  //     tiles.push(someTile);
-  //   }
-  // }
-
-  level = tiles;
-}
-
-// function tranferTo2DArray(rows, cols, someArray) {
-//   for (let i = 0; i < rows; i++) {
-//     for (let j = 0; j < cols; j++) {
-//       tiles[i][j] = someArray[i][j];
-//     }
-//   }
-// }
-
-function createEmpty2DArray(rows, cols) {
+function createEmpty2DArray(rows, cols) { //Maybe not necessary lol
   let newArray = [];
 
   for (let i = 0; i < rows; i++) {
@@ -215,19 +117,110 @@ function createEmpty2DArray(rows, cols) {
   return newArray;
 }
 
-function playMusic() {
-  // Wait a few seconds before playing music --> Test
+function transferToTilesArray(rows, cols, array) {
+  let someArray = [];
+
+  for (let i = 0; i < rows; i ++) {
+    for (let j = 0; j < cols; j ++) {
+      let some = array[i][j];
+      if (some !== "0") {
+        some = new TapTile(j, i);
+        someArray.push(some);
+      }
+    }
+  }
+
+  return someArray;
+}
+
+function displayStartScreen() {
+  image(duck, width/2 - duck.width/2, 0);
+
+  fill(0);
+  textSize(120);
+  text("Random", width/2 - 30, height/6 * 2);
+  text("Rhythm", width/2 + 60, height/6 * 3);
+
+  textSize(30);
+  text("A rhythm game of miscellaneous songs", width/2, height/7 * 4);
+
+  textSize(60);
+  text("Let's go!", width/2, height/8 * 6);
+
+  if (mouseX > width/2 - 140 && mouseX < width/2 + 140 && mouseY > height/9 * 6 && mouseY < height/9 * 6 + 80) {
+    fill(0, 0, 0, 0);
+    rect(width/2 - 140, height/9 * 6, 280, 80);
+    if (mouseIsPressed) {
+      screenState = "selection";
+    }
+  }
+}
+
+function displaySelectionScreen() {
+  image(skz, 0, 0, width/2, height, 0, 0, width/2, skz.height, COVER);
+  image(sleepwalkMVImage, width/2, 0, width/2, height, sleepwalkMVImage.width/2, 0, sleepwalkMVImage.width/2, sleepwalkMVImage.height, COVER);
+
+  // Darken images and display hover
+  fill(0, 0, 0, 200);
+
+  if (mouseX > 0 && mouseX < width/2 - 5 && mouseY > 0 && mouseY < height) { 
+    rect(0, 0, width/2, height);
+
+    fill(0, 0, 0, 230);
+    rect(width/2, 0, width/2, height);
+  }
+  else if (mouseX > width/2 + 5 && mouseX < width && mouseY > 0 && mouseY < height) {
+    rect(width/2, 0, width/2, height);
+
+    fill(0, 0, 0, 230);
+    rect(0, 0, width/2, height);
+  }
+  else {
+    rect(0, 0, width, height);
+  }
+
+  // Text
+  textSize(30);
+  fill(220);
+  text("Chk Chk Boom", width/4, height/2); 
+  text("Sleepwalk", width/4 * 3, height/2);
+
+  // Selection
   setTimeout(() => {
-    if (selection === 0) {
-      chkChkBoom.play();
+    if (mouseIsPressed) {
+      if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
+        level = levels[0];
+        levelBackground = skz;
+      }
+      else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
+        level = levels[1];
+        levelBackground = sleepwalkMVImage;
+      }
+      screenState = "play";
     }
-    else if (selection === 1) {
-      sleepwalk.play();
+  }, 500);
+}
+
+function playMusic() {
+  if (level === levels[0]) {
+    if (!chkChkBoom.isPlaying()) {
+    chkChkBoom.play();
     }
-  }, 3000);
+  }
+  else if (level === levels[1]) {
+    if (!sleepwalk.isPlaying()) {
+    sleepwalk.play();
+    }
+  }
 }
 
 function displayGrid() {
+  image(levelBackground, 0, 0, width, height, 0, 0, levelBackground.width, levelBackground.height, COVER);
+
+  // Darken background
+  fill(0, 0, 0, 200)
+  rect(0, 0, width, height);
+
   noStroke();
   fill(255);
   rect(width/2 - CELL_SIZE*2, 0, CELL_SIZE * 4, height);
@@ -245,32 +238,28 @@ function displayGrid() {
 }
 
 function playLevel() {
-  for (let i = 0; i < level.length; i++) {
-    for (let j = 0; j < level[i].length; j++) {
-      if (level[i][j] !== 0) {
-        level[i][j].move();
-        level[i][j].display();
-
-        // Check each tile 
-        let distFromLine = checkHit(dist(level[i][j].x, level[i][j].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i][j].column, height - height/8)); 
-
-        // if (key === "f" || key === "g" || key === "h" || key === "j") {
-        if (distFromLine === "amazing") {
-          score += 100;
-        }
-        else if (distFromLine === "great") {
-          score += 80;
-        }
-        else if (distFromLine === "nice") {
-          score += 60;
-        }
-        else if (distFromLine === "good") {
-          score += 40;
-        }
-        // }
-      }
-    }
+  for (let i = 0; i < level.length; i ++) {
+    level[i].move();
+    level[i].display();
   }
+  i++;
+
+  // Check each tile 
+  // let distFromLine = checkHit(dist(level[i][j].x, level[i][j].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i][j].column, height  - height/8)); 
+
+  // if (key === "f" || key === "g" || key === "h" || key === "j") {
+  // if (distFromLine === "amazing") {
+  //   score += 100;
+  // }
+  // else if (distFromLine === "great") {
+  //   score += 80;
+  // }
+  // else if (distFromLine === "nice") {
+  //   score += 60;
+  // }
+  // else if (distFromLine === "good") {
+  //   score += 40;
+  // }
 }
 
 function checkHit(distance) {
@@ -304,8 +293,7 @@ function updateScores() {
   //   if (score > aScore) {
   //     aScore = score; //Editing txt file
   //   }
-
-  // }
+  // } 
 
   // Local storage method
   if (score > highScore) {
@@ -315,25 +303,34 @@ function updateScores() {
 }
 
 function displayScore() {
+  if (!dragonMusic.isPlaying() && screenState === "score") { //Make it stop playing after leaving score page
+    dragonMusic.loop();
+  }
+  else {
+    dragonMusic.stop();
+  }
+
+  image(dragon, width/2 - [dragon.width * (height/dragon.height)]/2, 0, dragon.width * (height/dragon.height), dragon.height * (height/dragon.height));
+
   textSize(100);
   text("Good Job!", width/2, height/4);
 
   textSize(80);
   text(score, width/2, height/8 * 3);
 
-  // Button to go back to selection?
+  // Button to go back to selection
   rect(width/2 - 300, height/7 * 5 - 50, 600, 100);
   textSize(30);
   text("Confirm", width/2, height/7 * 5);
   if (mouseX > width/2 - 300 && mouseX < width/2 + 300 && mouseY > height/7 * 5 - 50 && mouseY < height/7 * 5 + 50 && mouseIsPressed) {
     screenState = "selection";
-    selection = "none";
   }
 }
 
 class Tile {
-  constructor(column) {
+  constructor(column, row) {
     // this.tileSize = CELL_SIZE - 5; Maybe make tiles a bit thinner?
+    this.row = row; 
     this.column = column;
     this.x = this.column * CELL_SIZE + (width/2 - CELL_SIZE*2);
   }
@@ -351,9 +348,9 @@ class Tile {
 }
 
 class TapTile extends Tile {
-  constructor(column) {
-    super(column);
-    this.y = 0 - TILE_HEIGHT;
+  constructor(column, row) {
+    super(column, row);
+    this.y = 0 - TILE_HEIGHT*(this.row + 1);
   }
 
   display() {
@@ -366,7 +363,7 @@ class TapTile extends Tile {
   }
 }
 
-class HoldTile extends Tile {
+class HoldTile extends Tile { //Work on this
   constructor(column, tileLength) {
     super(column);
     this.tileHeight = TILE_HEIGHT*tileLength;
