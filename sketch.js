@@ -1,4 +1,4 @@
-// Project Title
+// Random Rhythm
 // Angelina Zhu
 // Jan 21, 2025
 //
@@ -9,7 +9,6 @@ const CELL_SIZE = 127;
 const TILE_HEIGHT = 60;
 
 let screenState = "start";
-let selection;
 let songList; 
 let level;
 let score = 0;
@@ -42,11 +41,9 @@ function preload() {
 
   songList = loadStrings("txt-files/songs.txt"); //this might be useless now lol
 
-  // duck = createVideo(["duck-dance.mp4"]);
-  // duck.loop();
-  // duck.hide();
+  duck = loadImage("duck-dance.gif");
 
-  dragon = createVideo(["party-dance.mp4"]);
+  dragon = createVideo(["party-dance.mp4"]); //Maybe change back to gif (just in case?)
   dragon.loop();
   dragon.hide();
 
@@ -82,7 +79,7 @@ function setup() {
 
 function draw() {
   if (screenState === "start") {
-    background(255);
+    background(251);
     displayStartScreen();
   }
   else if (screenState === "selection") {
@@ -94,9 +91,9 @@ function draw() {
     setTimeout(() => {
       playMusic(); //Change screenstate at end of music
     }, 2000);
-
-    displayGrid();
+    
     playLevel();
+    displayGrid();
   }
   else if (screenState === "score") {
     background(255);
@@ -135,7 +132,7 @@ function transferToTilesArray(rows, cols, array) {
 }
 
 function displayStartScreen() {
-  // image(duck, width/2 - duck.width/2, 0);
+  image(duck, width/2 - duck.width * (height/duck.height)/2, 0, duck.width * (height/duck.height), duck.height * (height/duck.height));
 
   fill(0);
   textSize(120);
@@ -251,8 +248,7 @@ function playLevel() {
       checkHit(distFromLine);
     }
     else {
-      text("Miss", width/2, height/3);
-      return "miss";
+      text("Miss", width/2, height/3); //Pause at start before text starts showing up
     }
   }
   i++;
