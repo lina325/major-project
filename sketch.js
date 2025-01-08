@@ -243,15 +243,15 @@ function playLevel() {
     level[i].move();
     level[i].display();
 
-    if ((key === "f" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "j" && level[i].column === 3) && keyIsPressed) {
-      let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
-      checkHit(distFromLine);
-    }
-    else {
-      text("Miss", width/2, height/3); //Pause at start before text starts showing up
-    }
+  //   if ((key === "f" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "j" && level[i].column === 3) && keyIsPressed) { //Possible to just use y value
+  //     let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
+  //     checkHit(distFromLine);
+  //   }
+  //   else {
+  //     text("Miss", width/2, height/3); //Pause at start before text starts showing up
+  //   }
   }
-  i++;
+  // i++;
 }
 
 function getDistance(distance) {
