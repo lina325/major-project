@@ -9,6 +9,7 @@ const CELL_SIZE = 127;
 const TILE_HEIGHT = 60;
 
 let screenState = "start";
+let previousScreen;
 let songList; 
 let level;
 let score = 0;
@@ -28,7 +29,6 @@ let sleepwalk;
 let levels = [];
 let level0; 
 let level1;
-let i = 0;
 
 
 function preload() {
@@ -43,9 +43,7 @@ function preload() {
 
   duck = loadImage("duck-dance.gif");
 
-  dragon = createVideo(["party-dance.mp4"]); //Maybe change back to gif (just in case?)
-  dragon.loop();
-  dragon.hide();
+  dragon = loadImage("dragon-dance.gif");
 
   // Load all level txt files
   level0 = loadStrings("txt-files/chk-chk-boom.txt");
@@ -81,10 +79,20 @@ function draw() {
   if (screenState === "start") {
     background(251);
     displayStartScreen();
+
+    instructionsButton(0);
+  }
+  else if (screenState === "instructions") {
+    // background(random(255), random(255), random(255)); //Make it not a strobe light LOL
+    background(240);
+    displayInstructions();
+    backButton();
   }
   else if (screenState === "selection") {
     background(100);
     displaySelectionScreen();
+
+    instructionsButton(240);
   }
   else if (screenState === "play") {
     background(200);
@@ -92,13 +100,17 @@ function draw() {
       playMusic(); //Change screenstate at end of music
     }, 2000);
     
-    playLevel();
     displayGrid();
+    playLevel();
+
+    instructionsButton(240);
   }
   else if (screenState === "score") {
     background(255);
     displayScore();
     updateScores();
+
+    instructionsButton(0);
   }
 }
 
@@ -131,6 +143,43 @@ function transferToTilesArray(rows, cols, array) {
   return someArray;
 }
 
+function instructionsButton(textColour) { //Looks a little funky
+  stroke(textColour);
+  fill(0, 0, 0, 0);
+  rect(width - width/12 - 100, height/10 - 40, 200, 80, 10);
+
+  fill(textColour);
+  textSize(20);
+  text("Instructions", width - width/12, height/10);
+
+  if (mouseX > width - width/12 - 100 && mouseX < width - width/12 + 100 && mouseY > height/10 - 40 && mouseY < height/10 + 40 && mouseIsPressed) {
+    previousScreen = screenState;
+    screenState = "instructions";
+  }
+}
+
+function displayInstructions() {
+  fill(0); 
+  textSize(60);
+  text("How To Play", width/2, height/10);
+
+  textSize(40);
+  text("Keys - f, g, h, j\nEach key corresponds to a column - press the\nright key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!", width/2, height/8); //Edit later
+}
+
+function backButton() {
+  fill(0, 0, 0, 0);
+  rect(width - width/2 - 100, height - height/8 - 40, 200, 80, 10);
+
+  fill(0);
+  textSize(20);
+  text("Ok!", width - width/2, height - height/8);
+
+  if (mouseX > width - width/2 - 100 && mouseX < width - width/2 + 100 && mouseY > height/8 - 40 && mouseY < height/8 + 40 && mouseIsPressed) {
+    screenState = previousScreen;
+  }
+}
+
 function displayStartScreen() {
   image(duck, width/2 - duck.width * (height/duck.height)/2, 0, duck.width * (height/duck.height), duck.height * (height/duck.height));
 
@@ -147,7 +196,7 @@ function displayStartScreen() {
 
   if (mouseX > width/2 - 140 && mouseX < width/2 + 140 && mouseY > height/9 * 6 && mouseY < height/9 * 6 + 80) {
     fill(0, 0, 0, 0);
-    rect(width/2 - 140, height/9 * 6, 280, 80);
+    rect(width/2 - 140, height/9 * 6, 280, 80, 10);
     if (mouseIsPressed) {
       screenState = "selection";
     }
@@ -155,6 +204,8 @@ function displayStartScreen() {
 }
 
 function displaySelectionScreen() {
+  noStroke();
+
   image(skz, 0, 0, width/2, height, 0, 0, width/2, skz.height, COVER);
   image(sleepwalkMVImage, width/2, 0, width/2, height, sleepwalkMVImage.width/2, 0, sleepwalkMVImage.width/2, sleepwalkMVImage.height, COVER);
 
@@ -243,15 +294,14 @@ function playLevel() {
     level[i].move();
     level[i].display();
 
-  //   if ((key === "f" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "j" && level[i].column === 3) && keyIsPressed) { //Possible to just use y value
-  //     let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
-  //     checkHit(distFromLine);
-  //   }
-  //   else {
-  //     text("Miss", width/2, height/3); //Pause at start before text starts showing up
-  //   }
+    if ((key === "f" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "j" && level[i].column === 3) && keyIsPressed) { //Possible to just use y value
+      let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
+      checkHit(distFromLine);
+    }
+    // else {
+    //   text("Miss", width/2, height/3); //Pause at start before text starts showing up
+    // }
   }
-  // i++;
 }
 
 function getDistance(distance) {
@@ -320,6 +370,7 @@ function displayScore() {
   text(score, width/2, height/8 * 3);
 
   // Button to go back to selection
+  stroke(0);
   rect(width/2 - 300, height/7 * 5 - 50, 600, 100);
   textSize(30);
   text("Confirm", width/2, height/7 * 5);
