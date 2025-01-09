@@ -255,15 +255,22 @@ function playMusic() {
     if (!chkChkBoom.isPlaying()) {
       chkChkBoom.play();
     }
-    // else if (chkChkBoom.onended()) {
-    //   screenState = "score";
-    // }
+    chkChkBoom.onended(endLevel());
   }
   else if (level === levels[1]) {
     if (!sleepwalk.isPlaying()) {
       sleepwalk.play();
     }
+    sleepwalk.onended(endLevel());
   }
+}
+
+function endLevel() {
+  // Maybe add little ending message 
+
+  setTimeout(() => {
+    screenState = "score";
+  }, 1000);
 }
 
 function displayGrid() {
@@ -287,6 +294,11 @@ function displayGrid() {
   strokeWeight(3);
   stroke(0);
   rect(width/2 - CELL_SIZE*2, height - height/8, CELL_SIZE * 4, TILE_HEIGHT); 
+
+  // Put score in corner
+  textAlign(LEFT);
+  text(score, width/40, height/16);
+
 }
 
 function playLevel() {
@@ -298,9 +310,14 @@ function playLevel() {
       let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
       checkHit(distFromLine);
     }
-    // else {
-    //   text("Miss", width/2, height/3); //Pause at start before text starts showing up
-    // }
+    else {
+      text("Miss", width/2, height/3); //Pause at start before text starts showing up
+    }
+
+    // Remove off screen tiles --> Stop it from buffering later if y value gets crazy
+    if (level[i].y >= height) {
+      level.splice(i, 1);
+    }
   }
 }
 
@@ -371,8 +388,11 @@ function displayScore() {
 
   // Button to go back to selection
   stroke(0);
+  fill(0, 0, 0, 0);
   rect(width/2 - 300, height/7 * 5 - 50, 600, 100);
+
   textSize(30);
+  fill(0);
   text("Confirm", width/2, height/7 * 5);
   if (mouseX > width/2 - 300 && mouseX < width/2 + 300 && mouseY > height/7 * 5 - 50 && mouseY < height/7 * 5 + 50 && mouseIsPressed) {
     screenState = "selection";
