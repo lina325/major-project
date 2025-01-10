@@ -255,13 +255,17 @@ function playMusic() {
     if (!chkChkBoom.isPlaying()) {
       chkChkBoom.play();
     }
-    chkChkBoom.onended(endLevel());
+    // else {
+    //   chkChkBoom.onended(endLevel());
+    // }
   }
   else if (level === levels[1]) {
     if (!sleepwalk.isPlaying()) {
       sleepwalk.play();
     }
-    sleepwalk.onended(endLevel());
+    else {
+      sleepwalk.onended(endLevel());
+    }
   }
 }
 
@@ -299,6 +303,7 @@ function displayGrid() {
   textAlign(LEFT);
   text(score, width/40, height/16);
 
+  textAlign(CENTER);
 }
 
 function playLevel() {
