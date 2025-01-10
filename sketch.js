@@ -175,8 +175,8 @@ function backButton() {
   textSize(20);
   text("Ok!", width - width/2, height - height/8);
 
-  if (mouseX > width - width/2 - 100 && mouseX < width - width/2 + 100 && mouseY > height/8 - 40 && mouseY < height/8 + 40 && mouseIsPressed) {
-    screenState = previousScreen;
+  if (mouseX > width - width/2 - 100 && mouseX < width - width/2 + 100 && mouseY > height/8 - 40 && mouseY < height/8 + 40 && mouseIsPressed) { 
+    screenState = previousScreen; //Fix this
   }
 }
 
@@ -303,6 +303,7 @@ function displayGrid() {
   textAlign(LEFT);
   text(score, width/40, height/16);
 
+  // Change alignment back
   textAlign(CENTER);
 }
 
@@ -419,7 +420,7 @@ class Tile {
 
   move() { //Maybe change movement later
     if (this.y < height + TILE_HEIGHT) {
-      this.y += 6;
+      this.y += 13.5; //Rigure out slow or fast --> Change to do math for speed of each song instead
     }
   }
 }
