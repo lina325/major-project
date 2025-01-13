@@ -25,6 +25,7 @@ let dragonMusic;
 
 let chkChkBoom;
 let sleepwalk;
+let hit;
 
 let levels = [];
 let level0; 
@@ -35,15 +36,16 @@ function preload() {
   chkChkBoom = loadSound("audios/chk-chk-boom.mp3");
   sleepwalk = loadSound("audios/sleepwalk.mp3");
   dragonMusic = loadSound("audios/driftveil-city-music.mp3");
+  hit = loadSound("audios/tambourine.mp3"); //Not working for some reason... check if loading
 
   skz = loadImage("images/skz.png");
   sleepwalkMVImage = loadImage("images/sleepwalk.png");
 
   songList = loadStrings("txt-files/songs.txt"); //this might be useless now lol
 
-  duck = loadImage("duck-dance.gif");
+  duck = loadImage("backgrounds/duck-dance.gif");
 
-  dragon = loadImage("dragon-dance.gif");
+  dragon = loadImage("backgrounds/dragon-dance.gif");
 
   // Load all level txt files
   level0 = loadStrings("txt-files/chk-chk-boom.txt");
@@ -64,6 +66,7 @@ function setup() {
     highScore = getItem("highscore");
   }
 
+  // Change array to level tiles only
   for (let level of levels) {  
     let rows = level.length;
     let cols = 4;
@@ -114,19 +117,6 @@ function draw() {
   }
 }
 
-function createEmpty2DArray(rows, cols) { //Maybe not necessary lol
-  let newArray = [];
-
-  for (let i = 0; i < rows; i++) {
-    newArray.push([]);
-    for (let j = 0; j < cols; j ++) {
-      newArray[i].push(0);
-    }
-  }
-
-  return newArray;
-}
-
 function transferToTilesArray(rows, cols, array) {
   let someArray = [];
 
@@ -143,8 +133,11 @@ function transferToTilesArray(rows, cols, array) {
           if(array[n][j] === "h") {
             length ++;
           }
+          else {
+            break;
+          }
         }
-        someArray.push(new HoldTile(j, length));
+        someArray.push(new HoldTile(j, i, length));
       }
     }
   }
@@ -157,6 +150,7 @@ function instructionsButton(textColour) { //Looks a little funky
   fill(0, 0, 0, 0);
   rect(width - width/12 - 100, height/10 - 40, 200, 80, 10);
 
+  noStroke();
   fill(textColour);
   textSize(20);
   text("Instructions", width - width/12, height/10);
@@ -173,19 +167,23 @@ function displayInstructions() {
   text("How To Play", width/2, height/10);
 
   textSize(40);
-  text("Keys - f, g, h, j\nEach key corresponds to a column - press the\nright key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!", width/2, height/8); //Edit later
+  text("Keys - f, g, h, j\nEach key corresponds to a column - press the\nright key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!", width/2, height/4); //Edit later
 }
 
 function backButton() {
-  fill(0, 0, 0, 0);
-  rect(width - width/2 - 100, height - height/8 - 40, 200, 80, 10);
-
+  noStroke();
   fill(0);
   textSize(20);
   text("Ok!", width - width/2, height - height/8);
 
-  if (mouseX > width - width/2 - 100 && mouseX < width - width/2 + 100 && mouseY > height/8 - 40 && mouseY < height/8 + 40 && mouseIsPressed) { 
-    screenState = previousScreen; //Fix this
+  if (mouseX > width - width/2 - 100 && mouseX < width - width/2 + 100 && mouseY > height/8 - 40 && mouseY < height/8 + 40) { 
+    stroke(0);
+    fill(0, 0, 0, 0);
+    rect(width - width/2 - 100, height - height/8 - 40, 200, 80, 10);
+
+    if (mouseIsPressed) {
+      screenState = previousScreen; //Fix this
+    }
   }
 }
 
@@ -212,7 +210,7 @@ function displayStartScreen() {
   }
 }
 
-function displaySelectionScreen() {
+function displaySelectionScreen() { //Add artists
   noStroke();
 
   image(skz, 0, 0, width/2, height, 0, 0, width/2, skz.height, COVER);
@@ -261,25 +259,24 @@ function displaySelectionScreen() {
 
 function playMusic() {
   if (level === levels[0]) {
+    chkChkBoom.onended(endLevel()); //Test it
+
     if (!chkChkBoom.isPlaying()) {
       chkChkBoom.play();
     }
-    // else {
-    //   chkChkBoom.onended(endLevel());
-    // }
   }
   else if (level === levels[1]) {
+    sleepwalk.onended(endLevel());
+
     if (!sleepwalk.isPlaying()) {
       sleepwalk.play();
-    }
-    else {
-      sleepwalk.onended(endLevel());
     }
   }
 }
 
 function endLevel() {
-  // Maybe add little ending message 
+  textSize(80);
+  text("Cleared!", width/2, height/2);
 
   setTimeout(() => {
     screenState = "score";
@@ -310,6 +307,7 @@ function displayGrid() {
 
   // Put score in corner
   textAlign(LEFT);
+  textSize(40); //Check
   text(score, width/40, height/16);
 
   // Change alignment back
@@ -323,17 +321,17 @@ function playLevel() {
 
     if ((key === "f" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "j" && level[i].column === 3) && keyIsPressed) { //Possible to just use y value
       let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
+      text(distFromLine, width/2, height/3);
       checkHit(distFromLine); 
     }
-    else {
-      // text("Miss", width/2, height/3); //Pause at start before text starts showing up //Change to sound effects
-    } 
+    // else {
+    // text("Miss", width/2, height/3); //Pause at start before text starts showing up //Change to sound effects
+    // } 
     
     if (level[i].y >= height - height/8 + TILE_HEIGHT) {
       level.splice(i, 1);
     } 
   }
-  text
 }
 
 function getDistance(distance) {
@@ -378,11 +376,8 @@ function updateScores() {
 }
 
 function displayScore() {
-  if (!dragonMusic.isPlaying() && screenState === "score") { //Make it stop playing after leaving score page
+  if (!dragonMusic.isPlaying()) { //Make it stop playing after leaving score page
     dragonMusic.loop();
-  }
-  else {
-    dragonMusic.stop();
   }
 
   image(dragon, width/2 - [dragon.width * (height/dragon.height)]/2, 0, dragon.width * (height/dragon.height), dragon.height * (height/dragon.height));
@@ -403,6 +398,12 @@ function displayScore() {
   text("Confirm", width/2, height/7 * 5);
   if (mouseX > width/2 - 300 && mouseX < width/2 + 300 && mouseY > height/7 * 5 - 50 && mouseY < height/7 * 5 + 50 && mouseIsPressed) {
     screenState = "selection";
+    dragonMusic.stop();
+  }
+
+  // Stop music after clicking instructions button
+  if (mouseX > width - width/12 - 100 && mouseX < width - width/12 + 100 && mouseY > height/10 - 40 && mouseY < height/10 + 40 && mouseIsPressed) {
+    dragonMusic.stop();
   }
 }
 
