@@ -133,9 +133,18 @@ function transferToTilesArray(rows, cols, array) {
   for (let i = 0; i < rows; i ++) {
     for (let j = 0; j < cols; j ++) {
       let some = array[i][j];
-      if (some !== "0") {
-        some = new TapTile(j, i);
-        someArray.push(some);
+      if (some === "t") {
+        // some = new TapTile(j, i);
+        someArray.push(new TapTile(j, i));
+      }
+      else if (some === "h") {
+        let length = 0;
+        for (let n = i; n < rows; n++) {
+          if(array[n][j] === "h") {
+            length ++;
+          }
+        }
+        someArray.push(new HoldTile(j, length));
       }
     }
   }
@@ -281,10 +290,10 @@ function displayGrid() {
   image(levelBackground, 0, 0, width, height, 0, 0, levelBackground.width, levelBackground.height, COVER);
 
   // Darken background
+  noStroke();
   fill(0, 0, 0, 200);
   rect(0, 0, width, height);
 
-  noStroke();
   fill(255);
   rect(width/2 - CELL_SIZE*2, 0, CELL_SIZE * 4, height);
     
@@ -314,61 +323,53 @@ function playLevel() {
 
     if ((key === "f" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "j" && level[i].column === 3) && keyIsPressed) { //Possible to just use y value
       let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
-      checkHit(distFromLine);
+      checkHit(distFromLine); 
     }
     else {
-      text("Miss", width/2, height/3); //Pause at start before text starts showing up
-    }
-
-    // Remove off screen tiles --> Stop it from buffering later if y value gets crazy
-    if (level[i].y >= height) {
+      // text("Miss", width/2, height/3); //Pause at start before text starts showing up //Change to sound effects
+    } 
+    
+    if (level[i].y >= height - height/8 + TILE_HEIGHT) {
       level.splice(i, 1);
-    }
+    } 
   }
+  text
 }
 
 function getDistance(distance) {
-  if (distance < 10) {
-    text("Amazing!", width/2, height/3);
-    return "amazing";
-  }
-  else if (distance < 15 && mouseIsPressed) {
-    text("Great!", width/2, height/3);
-    return "great";
+  if (distance < 15) {
+    return "Amazing";
   }
   else if (distance < 20 && mouseIsPressed) {
-    text("Nice", width/2, height/3);
-    return "nice";
+    return "Great";
   }
   else if (distance < 25 && mouseIsPressed) {
-    text("Good", width/2, height/3);
-    return "good";
+    return "Nice";
+  }
+  else if (distance < 30 && mouseIsPressed) {
+    return "Good";
+  }
+  else {
+    return "Miss";
   }
 }
 
 function checkHit(distance) {
-  if (distance === "amazing") {
+  if (distance === "Amazing") {
     score += 100;
   }
-  else if (distance === "great") {
+  else if (distance === "Great") {
     score += 80;
   }
-  else if (distance === "nice") {
+  else if (distance === "Nice") {
     score += 60;
   }
-  else if (distance === "good") {
+  else if (distance === "Good") {
     score += 40;
   }
 }
 
 function updateScores() {
-  // let topScores = loadStrings("top-scores.txt");
-  // for (let aScore of topScores) {
-  //   if (score > aScore) {
-  //     aScore = score; //Editing txt file
-  //   }
-  // } 
-
   // Local storage method
   if (score > highScore) {
     highScore = score;
@@ -420,7 +421,7 @@ class Tile {
 
   move() { //Maybe change movement later
     if (this.y < height + TILE_HEIGHT) {
-      this.y += 13.5; //Rigure out slow or fast --> Change to do math for speed of each song instead
+      this.y += 14; //Figure out slow or fast --> Change to do math for speed of each song instead
     }
   }
 }
@@ -441,11 +442,11 @@ class TapTile extends Tile {
   }
 }
 
-class HoldTile extends Tile { //Work on this
-  constructor(column, tileLength) {
-    super(column);
+class HoldTile extends Tile { 
+  constructor(column, row, tileLength) {
+    super(column, row);
     this.tileHeight = TILE_HEIGHT*tileLength;
-    this.y = 0 - this.tileHeight;
+    this.y = 0 - this.tileHeight*(this.row + 1); //Double check this logic cuz ur delirious 
   }
 
   display() {
