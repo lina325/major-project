@@ -23,6 +23,7 @@ let duck;
 let dragon;
 let dragonMusic;
 
+let music = [];
 let chkChkBoom;
 let sleepwalk;
 let hit;
@@ -35,6 +36,7 @@ let level1;
 function preload() {
   chkChkBoom = loadSound("audios/chk-chk-boom.mp3");
   sleepwalk = loadSound("audios/sleepwalk.mp3");
+
   dragonMusic = loadSound("audios/driftveil-city-music.mp3");
   hit = loadSound("audios/tambourine.mp3"); //Not working for some reason... check if loading
 
@@ -47,13 +49,9 @@ function preload() {
 
   dragon = loadImage("backgrounds/dragon-dance.gif");
 
-  // Load all level txt files
+  // Load level txt files
   level0 = loadStrings("txt-files/chk-chk-boom.txt");
   level1 = loadStrings("txt-files/sleepwalk.txt");
-
-  // Place into array
-  levels.push(level0);
-  levels.push(level1);
 }
 
 function setup() {
@@ -66,15 +64,36 @@ function setup() {
     highScore = getItem("highscore");
   }
 
+  // Setup for after music ended 
+  // chkChkBoom.onended(endLevel());
+  // sleepwalk.onended(endLevel());
+
+  // Put music into array
+  music.push(chkChkBoom);
+  music.push(sleepwalk);
+
+  // Place levels into array
+  levels.push(level0);
+  levels.push(level1);
+
+
   // Change array to level tiles only
-  for (let level of levels) {  
-    let rows = level.length;
+
+  // Set variable to avoid infintie for loop
+  let length = levels.length
+
+  for (let i = 0; i < length; i ++) {  
+    let rows = levels[i].length;
     let cols = 4;
     
-    let tiles = transferToTilesArray(rows, cols, level);
+    let tiles = transferToTilesArray(rows, cols, levels[i]);
 
-    levels.shift();
     levels.push(tiles);
+  }
+
+  // Remove original array of strings
+  for (let i = 0; i < length; i ++) {
+    levels.shift();
   }
 }
 
@@ -86,10 +105,10 @@ function draw() {
     instructionsButton(0);
   }
   else if (screenState === "instructions") {
+    background(245);
     // background(random(255), random(255), random(255)); //Make it not a strobe light LOL
-    background(240);
+
     displayInstructions();
-    backButton();
   }
   else if (screenState === "selection") {
     background(100);
@@ -99,6 +118,7 @@ function draw() {
   }
   else if (screenState === "play") {
     background(200);
+
     setTimeout(() => {
       playMusic(); //Change screenstate at end of music
     }, 2000);
@@ -130,7 +150,7 @@ function transferToTilesArray(rows, cols, array) {
       else if (some === "h") {
         let length = 0;
         for (let n = i; n < rows; n++) {
-          if(array[n][j] === "h") {
+          if (array[n][j] === "h") {
             length ++;
           }
           else {
@@ -145,7 +165,7 @@ function transferToTilesArray(rows, cols, array) {
   return someArray;
 }
 
-function instructionsButton(textColour) { //Looks a little funky
+function instructionsButton(textColour) { 
   stroke(textColour);
   fill(0, 0, 0, 0);
   rect(width - width/12 - 100, height/10 - 40, 200, 80, 10);
@@ -167,7 +187,9 @@ function displayInstructions() {
   text("How To Play", width/2, height/10);
 
   textSize(40);
-  text("Keys - f, g, h, j\nEach key corresponds to a column - press the\nright key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!", width/2, height/4); //Edit later
+  text("Press the right key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!\n\nKeys - f, g, h, j", width/2, height/4); //Edit later
+
+  backButton();
 }
 
 function backButton() {
@@ -176,10 +198,10 @@ function backButton() {
   textSize(20);
   text("Ok!", width - width/2, height - height/8);
 
-  if (mouseX > width - width/2 - 100 && mouseX < width - width/2 + 100 && mouseY > height/8 - 40 && mouseY < height/8 + 40) { 
+  if (mouseX > width/2 - 100 && mouseX < width/2 + 100 && mouseY > height/8 - 40 && mouseY < height/8 + 40) { 
     stroke(0);
     fill(0, 0, 0, 0);
-    rect(width - width/2 - 100, height - height/8 - 40, 200, 80, 10);
+    rect(width/2 - 100, height - height/8 - 40, 200, 80, 10);
 
     if (mouseIsPressed) {
       screenState = previousScreen; //Fix this
@@ -201,6 +223,7 @@ function displayStartScreen() {
   textSize(60);
   text("Let's go!", width/2, height/8 * 6);
 
+  stroke(0);
   if (mouseX > width/2 - 140 && mouseX < width/2 + 140 && mouseY > height/9 * 6 && mouseY < height/9 * 6 + 80) {
     fill(0, 0, 0, 0);
     rect(width/2 - 140, height/9 * 6, 280, 80, 10);
@@ -259,19 +282,19 @@ function displaySelectionScreen() { //Add artists
 
 function playMusic() {
   if (level === levels[0]) {
-    chkChkBoom.onended(endLevel()); //Test it
-
-    if (!chkChkBoom.isPlaying()) {
-      chkChkBoom.play();
+    if (!music[0].isPlaying()) {
+      music[0].play();
     }
+    // chkChkBoom.onended(endLevel());
   }
   else if (level === levels[1]) {
-    sleepwalk.onended(endLevel());
-
-    if (!sleepwalk.isPlaying()) {
-      sleepwalk.play();
+    if (!music[1].isPlaying()) {
+      music[1].play();
     }
+    // sleepwalk.onended(endLevel());
   }
+
+  // music[m].onended(endLevel());
 }
 
 function endLevel() {
@@ -307,7 +330,7 @@ function displayGrid() {
 
   // Put score in corner
   textAlign(LEFT);
-  textSize(40); //Check
+  textSize(35); //Check
   text(score, width/40, height/16);
 
   // Change alignment back
@@ -338,13 +361,13 @@ function getDistance(distance) {
   if (distance < 15) {
     return "Amazing";
   }
-  else if (distance < 20 && mouseIsPressed) {
+  else if (distance < 25 && mouseIsPressed) {
     return "Great";
   }
-  else if (distance < 25 && mouseIsPressed) {
+  else if (distance < 35 && mouseIsPressed) {
     return "Nice";
   }
-  else if (distance < 30 && mouseIsPressed) {
+  else if (distance < 45 && mouseIsPressed) {
     return "Good";
   }
   else {
@@ -382,24 +405,29 @@ function displayScore() {
 
   image(dragon, width/2 - [dragon.width * (height/dragon.height)]/2, 0, dragon.width * (height/dragon.height), dragon.height * (height/dragon.height));
 
+  noStroke();
   textSize(100);
   text("Good Job!", width/2, height/4);
 
   textSize(80);
   text(score, width/2, height/8 * 3);
 
-  // Button to go back to selection
-  stroke(0);
-  fill(0, 0, 0, 0);
-  rect(width/2 - 300, height/7 * 5 - 50, 600, 100);
-
-  textSize(30);
+  // Button to go back to selection  
+  noStroke();
+  textSize(35);
   fill(0);
   text("Confirm", width/2, height/7 * 5);
-  if (mouseX > width/2 - 300 && mouseX < width/2 + 300 && mouseY > height/7 * 5 - 50 && mouseY < height/7 * 5 + 50 && mouseIsPressed) {
-    screenState = "selection";
-    dragonMusic.stop();
-  }
+  
+  if (mouseX > width/2 - 300 && mouseX < width/2 + 300 && mouseY > height/7 * 5 - 50 && height/7 * 5 + 50) {
+    stroke(0);
+    fill(0, 0, 0, 0);
+    rect(width/2 - 300, height/7 * 5 - 50, 600, 100, 10);
+
+    if (mouseIsPressed) {
+      screenState = "selection";
+      dragonMusic.stop();
+    }
+  }    
 
   // Stop music after clicking instructions button
   if (mouseX > width - width/12 - 100 && mouseX < width - width/12 + 100 && mouseY > height/10 - 40 && mouseY < height/10 + 40 && mouseIsPressed) {
@@ -416,13 +444,14 @@ class Tile {
   }
 
   display() {
-    strokeWeight(1);
+    // strokeWeight(1);
+    noStroke()
     fill(210);
   }
 
   move() { //Maybe change movement later
     if (this.y < height + TILE_HEIGHT) {
-      this.y += 14; //Figure out slow or fast --> Change to do math for speed of each song instead
+      this.y += 13.605; //Figure out slow or fast --> Change to do math for speed of each song instead
     }
   }
 }
@@ -435,7 +464,7 @@ class TapTile extends Tile {
 
   display() {
     super.display();
-    rect(this.x, this.y, CELL_SIZE, TILE_HEIGHT);
+    rect(this.x, this.y, CELL_SIZE, TILE_HEIGHT, 10);
   }
 
   move() {
@@ -447,12 +476,12 @@ class HoldTile extends Tile {
   constructor(column, row, tileLength) {
     super(column, row);
     this.tileHeight = TILE_HEIGHT*tileLength;
-    this.y = 0 - this.tileHeight*(this.row + 1); //Double check this logic cuz ur delirious 
+    this.y = 0 - TILE_HEIGHT*(this.row + 1) - this.tileHeight; //Double check this logic cuz ur delirious 
   }
 
   display() {
     super.display();
-    rect(this.x, this.y, CELL_SIZE, this.tileHeight);
+    rect(this.x, this.y, CELL_SIZE, this.tileHeight, 10);
   }
 
   move() {
