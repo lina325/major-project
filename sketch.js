@@ -27,6 +27,7 @@ let music = [];
 let chkChkBoom;
 let sleepwalk;
 let hit;
+let bpm;
 
 let levels = [];
 let level0; 
@@ -80,7 +81,7 @@ function setup() {
   // Change array to level tiles only
 
   // Set variable to avoid infintie for loop
-  let length = levels.length
+  let length = levels.length;
 
   for (let i = 0; i < length; i ++) {  
     let rows = levels[i].length;
@@ -144,7 +145,6 @@ function transferToTilesArray(rows, cols, array) {
     for (let j = 0; j < cols; j ++) {
       let some = array[i][j];
       if (some === "t") {
-        // some = new TapTile(j, i);
         someArray.push(new TapTile(j, i));
       }
       else if (some === "h") {
@@ -182,12 +182,15 @@ function instructionsButton(textColour) {
 }
 
 function displayInstructions() {
+  noStroke();
   fill(0); 
-  textSize(60);
-  text("How To Play", width/2, height/10);
+  textSize(65);
+  text("How To Play", width/2, height/6);
 
   textSize(40);
-  text("Press the right key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!\n\nKeys - f, g, h, j", width/2, height/4); //Edit later
+  text("Press the right key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!", width/2, height/3); //Edit later
+  textSize(30);
+  text("Keys - f, g, h, j", width/2, height/8 * 5);
 
   backButton();
 }
@@ -195,16 +198,16 @@ function displayInstructions() {
 function backButton() {
   noStroke();
   fill(0);
-  textSize(20);
+  textSize(35);
   text("Ok!", width - width/2, height - height/8);
 
-  if (mouseX > width/2 - 100 && mouseX < width/2 + 100 && mouseY > height/8 - 40 && mouseY < height/8 + 40) { 
+  if (mouseX > width/2 - 100 && mouseX < width/2 + 100 && mouseY > height - height/8 - 40 && mouseY < height - height/8 + 40) { 
     stroke(0);
     fill(0, 0, 0, 0);
-    rect(width/2 - 100, height - height/8 - 40, 200, 80, 10);
+    rect(width/2 - 100, height - height/8 - 50, 200, 80, 10);
 
     if (mouseIsPressed) {
-      screenState = previousScreen; //Fix this
+      screenState = previousScreen;
     }
   }
 }
@@ -223,10 +226,11 @@ function displayStartScreen() {
   textSize(60);
   text("Let's go!", width/2, height/8 * 6);
 
-  stroke(0);
   if (mouseX > width/2 - 140 && mouseX < width/2 + 140 && mouseY > height/9 * 6 && mouseY < height/9 * 6 + 80) {
+    stroke(0);
     fill(0, 0, 0, 0);
     rect(width/2 - 140, height/9 * 6, 280, 80, 10);
+
     if (mouseIsPressed) {
       screenState = "selection";
     }
@@ -269,10 +273,12 @@ function displaySelectionScreen() { //Add artists
     if (mouseIsPressed) {
       if (mouseX > 0 && mouseX < width/2 && mouseY > 0 && mouseY < height) {
         level = levels[0];
+        bpm = 102;
         levelBackground = skz;
       }
-      else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
+      else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) { //Make so it doesn't include instructions button && mouseX > width - width/12 - 100 && mouseX < width - width/12 + 100 && mouseY < height/10 - 40 && mouseY > height/10 + 40
         level = levels[1];
+        bpm = 114;
         levelBackground = sleepwalkMVImage;
       }
       screenState = "play";
@@ -285,7 +291,7 @@ function playMusic() {
     if (!music[0].isPlaying()) {
       music[0].play();
     }
-    // chkChkBoom.onended(endLevel());
+    music[0].onended(endLevel);
   }
   else if (level === levels[1]) {
     if (!music[1].isPlaying()) {
@@ -293,8 +299,6 @@ function playMusic() {
     }
     // sleepwalk.onended(endLevel());
   }
-
-  // music[m].onended(endLevel());
 }
 
 function endLevel() {
@@ -344,12 +348,9 @@ function playLevel() {
 
     if ((key === "f" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "j" && level[i].column === 3) && keyIsPressed) { //Possible to just use y value
       let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
-      text(distFromLine, width/2, height/3);
+      // text(distFromLine, width/2, height/3); //Maybe move out into draw loop
       checkHit(distFromLine); 
     }
-    // else {
-    // text("Miss", width/2, height/3); //Pause at start before text starts showing up //Change to sound effects
-    // } 
     
     if (level[i].y >= height - height/8 + TILE_HEIGHT) {
       level.splice(i, 1);
@@ -359,15 +360,19 @@ function playLevel() {
 
 function getDistance(distance) {
   if (distance < 15) {
+    hit.play();
     return "Amazing";
   }
-  else if (distance < 25 && mouseIsPressed) {
+  else if (distance < 20) {
+    hit.play();
     return "Great";
   }
-  else if (distance < 35 && mouseIsPressed) {
+  else if (distance < 25) {
+    hit.play();
     return "Nice";
   }
-  else if (distance < 45 && mouseIsPressed) {
+  else if (distance < 30) {
+    hit.play();
     return "Good";
   }
   else {
@@ -437,21 +442,23 @@ function displayScore() {
 
 class Tile {
   constructor(column, row) {
-    // this.tileSize = CELL_SIZE - 5; Maybe make tiles a bit thinner?
     this.row = row; 
     this.column = column;
     this.x = this.column * CELL_SIZE + (width/2 - CELL_SIZE*2);
   }
 
   display() {
-    // strokeWeight(1);
-    noStroke()
+    noStroke();
     fill(210);
   }
 
-  move() { //Maybe change movement later
+  move() { 
     if (this.y < height + TILE_HEIGHT) {
-      this.y += 13.605; //Figure out slow or fast --> Change to do math for speed of each song instead
+      let secPerBeat = 60/bpm;
+      let pxPerSec = 60/(1/8 * secPerBeat);
+      let pxPerFrame = pxPerSec/60;
+
+      this.y += pxPerFrame; 
     }
   }
 }
@@ -464,7 +471,7 @@ class TapTile extends Tile {
 
   display() {
     super.display();
-    rect(this.x, this.y, CELL_SIZE, TILE_HEIGHT, 10);
+    rect(this.x, this.y, CELL_SIZE, TILE_HEIGHT, 6);
   }
 
   move() {
