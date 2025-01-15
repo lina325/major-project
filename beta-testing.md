@@ -13,3 +13,4 @@
 - Timing 
 - Scoring 
 - Finish the actual maps 
+- Instructions button conflict with selection screen

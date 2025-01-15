@@ -5,7 +5,7 @@
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
 
-const CELL_SIZE = 127;
+const TILE_WIDTH = 127;
 const TILE_HEIGHT = 60;
 
 let screenState = "start";
@@ -18,6 +18,7 @@ let highScore;
 let skz;
 let sleepwalkMVImage;
 let levelBackground;
+let colours = ["#d4fae6", "#d6f8ff", "#e8d4fa", "#ffebf8"];
 
 let duck;
 let dragon;
@@ -39,12 +40,10 @@ function preload() {
   sleepwalk = loadSound("audios/sleepwalk.mp3");
 
   dragonMusic = loadSound("audios/driftveil-city-music.mp3");
-  hit = loadSound("audios/tambourine.mp3"); //Not working for some reason... check if loading
+  hit = loadSound("audios/tambourine.mp3"); 
 
   skz = loadImage("images/skz.png");
   sleepwalkMVImage = loadImage("images/sleepwalk.png");
-
-  songList = loadStrings("txt-files/songs.txt"); //this might be useless now lol
 
   duck = loadImage("backgrounds/duck-dance.gif");
 
@@ -57,7 +56,7 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  numOfRows = height/CELL_SIZE;
+  numOfRows = height/TILE_WIDTH;
   
   textAlign(CENTER);
 
@@ -65,11 +64,7 @@ function setup() {
     highScore = getItem("highscore");
   }
 
-  // Setup for after music ended 
-  // chkChkBoom.onended(endLevel());
-  // sleepwalk.onended(endLevel());
-
-  // Put music into array
+  // Put music into array --> Not necessary, consider removing 
   music.push(chkChkBoom);
   music.push(sleepwalk);
 
@@ -101,7 +96,7 @@ function setup() {
 function draw() {
   if (screenState === "start") {
     background(251);
-    displayStartScreen();
+    displayStartScreen(); //Maybe change backgrounds to be more interestinggg
 
     instructionsButton(0);
   }
@@ -121,13 +116,18 @@ function draw() {
     background(200);
 
     setTimeout(() => {
-      playMusic(); //Change screenstate at end of music
+      playMusic(); 
     }, 2000);
     
     displayGrid();
     playLevel();
 
     instructionsButton(240);
+  }
+  else if (screenState === "pause") {
+    // Page where rect pops up in middle 
+    // Background is level paused (draw it without playLevel())
+    // Find a way to make it pause before starting again...
   }
   else if (screenState === "score") {
     background(255);
@@ -185,12 +185,12 @@ function displayInstructions() {
   noStroke();
   fill(0); 
   textSize(65);
-  text("How To Play", width/2, height/6);
+  text("How To Play", width/2, height/5);
 
-  textSize(40);
-  text("Press the right key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!", width/2, height/3); //Edit later
+  textSize(35);
+  text("Press the right key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!\n\nThere are tap tiles (press once) and hold tiles (hold down the key).\nMake sure you know which key to press!", width/2, height/3); //Edit later
   textSize(30);
-  text("Keys - f, g, h, j", width/2, height/8 * 5);
+  text("Keys - d (left column)\ng (middle-left column)\nh (right-middle column)\nk (right column)", width/2, height/8 * 5);
 
   backButton();
 }
@@ -237,7 +237,7 @@ function displayStartScreen() {
   }
 }
 
-function displaySelectionScreen() { //Add artists
+function displaySelectionScreen() { 
   noStroke();
 
   image(skz, 0, 0, width/2, height, 0, 0, width/2, skz.height, COVER);
@@ -263,10 +263,14 @@ function displaySelectionScreen() { //Add artists
   }
 
   // Text
-  textSize(30);
+  textSize(40);
   fill(220);
   text("Chk Chk Boom", width/4, height/2); 
   text("Sleepwalk", width/4 * 3, height/2);
+
+  textSize(20);
+  text("Stray Kids", width/4, height/12 * 7);
+  text("natori", width/4 * 3, height/12 * 7);
 
   // Selection
   setTimeout(() => {
@@ -297,7 +301,7 @@ function playMusic() {
     if (!music[1].isPlaying()) {
       music[1].play();
     }
-    // sleepwalk.onended(endLevel());
+    music[1].onended(endLevel);
   }
 }
 
@@ -319,25 +323,36 @@ function displayGrid() {
   rect(0, 0, width, height);
 
   fill(255);
-  rect(width/2 - CELL_SIZE*2, 0, CELL_SIZE * 4, height);
+  rect(width/2 - TILE_WIDTH*2, 0, TILE_WIDTH * 4, height);
     
   for (let i = 0; i < 5; i++) {
     strokeWeight(1);
     stroke(200);
-    line(i * CELL_SIZE + (width/2 - CELL_SIZE*2), 0, i * CELL_SIZE + (width/2 - CELL_SIZE*2), height);
+    line(i * TILE_WIDTH + (width/2 - TILE_WIDTH*2), 0, i * TILE_WIDTH + (width/2 - TILE_WIDTH*2), height);
   }
-  
-  // Draw the target line --> Maybe change to something that looks nicer later
-  strokeWeight(3);
-  stroke(0);
-  rect(width/2 - CELL_SIZE*2, height - height/8, CELL_SIZE * 4, TILE_HEIGHT); 
+
+  // Draw target line
+  stroke(200);
+  let keys = ["d", "g", "h", "k"];
+  // let colour = ["#d4fae6", "#d6f8ff", "#e8d4fa", "#ffebf8"];
+
+  for (let i = 0; i < 4; i++) {
+    fill(255); //Temp
+    // fill(colour[i]); //Not workinggg
+    rect(i * TILE_WIDTH + (width/2 - TILE_WIDTH*2), height - height/8, TILE_WIDTH, TILE_HEIGHT);
+
+    fill(0);
+    text(keys[i], i * TILE_WIDTH + (width/2 - TILE_WIDTH*2) + TILE_WIDTH/2, height - height/8);
+  }
 
   // Put score in corner
+  noStroke();
+  fill(255);
   textAlign(LEFT);
-  textSize(35); //Check
+  textSize(35); 
   text(score, width/40, height/16);
 
-  // Change alignment back
+  // Change alignment back --> Maybe move to next function that runs
   textAlign(CENTER);
 }
 
@@ -346,15 +361,15 @@ function playLevel() {
     level[i].move();
     level[i].display();
 
-    if ((key === "f" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "j" && level[i].column === 3) && keyIsPressed) { //Possible to just use y value
-      let distFromLine = getDistance(dist(level[i].x, level[i].y, width/2 - CELL_SIZE*2 + CELL_SIZE*level[i].column, height  - height/8)); 
-      // text(distFromLine, width/2, height/3); //Maybe move out into draw loop
+    if ((key === "d" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "k" && level[i].column === 3) && keyIsPressed) { //Possible to just use y value
+      let distFromLine = getDistance(abs(dist(level[i].x, level[i].y, width/2 - TILE_WIDTH*2 + TILE_WIDTH*level[i].column, height  - height/8))); 
       checkHit(distFromLine); 
     }
     
     if (level[i].y >= height - height/8 + TILE_HEIGHT) {
       level.splice(i, 1);
     } 
+    // text(distFromLine, width/2, height/3); //Maybe move out into draw loop
   }
 }
 
@@ -444,12 +459,13 @@ class Tile {
   constructor(column, row) {
     this.row = row; 
     this.column = column;
-    this.x = this.column * CELL_SIZE + (width/2 - CELL_SIZE*2);
+    this.x = this.column * TILE_WIDTH + (width/2 - TILE_WIDTH*2);
+    this.colour = colours[this.column];
   }
 
   display() {
     noStroke();
-    fill(210);
+    fill(this.colour);
   }
 
   move() { 
@@ -457,6 +473,7 @@ class Tile {
       let secPerBeat = 60/bpm;
       let pxPerSec = 60/(1/8 * secPerBeat);
       let pxPerFrame = pxPerSec/60;
+      console.log(pxPerFrame);
 
       this.y += pxPerFrame; 
     }
@@ -471,7 +488,7 @@ class TapTile extends Tile {
 
   display() {
     super.display();
-    rect(this.x, this.y, CELL_SIZE, TILE_HEIGHT, 6);
+    rect(this.x, this.y, TILE_WIDTH, TILE_HEIGHT, 10);
   }
 
   move() {
@@ -488,7 +505,7 @@ class HoldTile extends Tile {
 
   display() {
     super.display();
-    rect(this.x, this.y, CELL_SIZE, this.tileHeight, 10);
+    rect(this.x, this.y, TILE_WIDTH, this.tileHeight, 10);
   }
 
   move() {
