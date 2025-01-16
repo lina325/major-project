@@ -125,6 +125,9 @@ function draw() {
     instructionsButton(240);
   }
   else if (screenState === "pause") {
+    displayGrid();
+
+    displayPauseScreen();
     // Page where rect pops up in middle 
     // Background is level paused (draw it without playLevel())
     // Find a way to make it pause before starting again...
@@ -163,6 +166,31 @@ function transferToTilesArray(rows, cols, array) {
   }
 
   return someArray;
+}
+
+function displayStartScreen() {
+  image(duck, width/2 - duck.width * (height/duck.height)/2, 0, duck.width * (height/duck.height), duck.height * (height/duck.height));
+  
+  fill(0);
+  textSize(120);
+  text("Random", width/2 - 30, height/6 * 2);
+  text("Rhythm", width/2 + 60, height/6 * 3);
+  
+  textSize(30);
+  text("A rhythm game of miscellaneous songs", width/2, height/7 * 4);
+  
+  textSize(60);
+  text("Let's go!", width/2, height/8 * 6);
+
+  if (mouseX > width/2 - 140 && mouseX < width/2 + 140 && mouseY > height/9 * 6 && mouseY < height/9 * 6 + 80) {
+    stroke(0);
+    fill(0, 0, 0, 0);
+    rect(width/2 - 140, height/9 * 6, 280, 80, 10);
+    
+    if (mouseIsPressed) {
+      screenState = "selection";
+    }
+  }
 }
 
 function instructionsButton(textColour) { 
@@ -208,31 +236,6 @@ function backButton() {
 
     if (mouseIsPressed) {
       screenState = previousScreen;
-    }
-  }
-}
-
-function displayStartScreen() {
-  image(duck, width/2 - duck.width * (height/duck.height)/2, 0, duck.width * (height/duck.height), duck.height * (height/duck.height));
-
-  fill(0);
-  textSize(120);
-  text("Random", width/2 - 30, height/6 * 2);
-  text("Rhythm", width/2 + 60, height/6 * 3);
-
-  textSize(30);
-  text("A rhythm game of miscellaneous songs", width/2, height/7 * 4);
-
-  textSize(60);
-  text("Let's go!", width/2, height/8 * 6);
-
-  if (mouseX > width/2 - 140 && mouseX < width/2 + 140 && mouseY > height/9 * 6 && mouseY < height/9 * 6 + 80) {
-    stroke(0);
-    fill(0, 0, 0, 0);
-    rect(width/2 - 140, height/9 * 6, 280, 80, 10);
-
-    if (mouseIsPressed) {
-      screenState = "selection";
     }
   }
 }
@@ -427,10 +430,13 @@ function displayScore() {
 
   noStroke();
   textSize(100);
-  text("Good Job!", width/2, height/4);
+  text("Good Job!", width/2, height/4); //Maybe change text for different scores 
 
   textSize(80);
   text(score, width/2, height/8 * 3);
+
+  textSize(60);
+  text(highScore, width/3, height/6); //Check placement later
 
   // Button to go back to selection  
   noStroke();
