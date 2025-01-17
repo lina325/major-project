@@ -369,7 +369,7 @@ function playLevel() {
       checkHit(distFromLine); 
     }
     
-    if (level[i].y >= height - height/8 + TILE_HEIGHT) {
+    if (level[i].y >= height + TILE_HEIGHT) {
       level.splice(i, 1);
     } 
     // text(distFromLine, width/2, height/3); //Maybe move out into draw loop
@@ -399,6 +399,7 @@ function getDistance(distance) {
 }
 
 function checkHit(distance) {
+  // set an if statement for different tile types
   if (distance === "Amazing") {
     score += 100;
   }
