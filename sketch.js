@@ -18,7 +18,7 @@ let highScore;
 let skz;
 let sleepwalkMVImage;
 let levelBackground;
-let colours = ["#d4fae6", "#d6f8ff", "#e8d4fa", "#ffebf8"];
+let colours = ["#d4fae6", "#e8d4fa", "#d6f8ff", "#ffebf8"];
 
 let duck;
 let dragon;
@@ -283,7 +283,7 @@ function displaySelectionScreen() {
         bpm = 102;
         levelBackground = skz;
       }
-      else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) { //Make so it doesn't include instructions button && mouseX > width - width/12 - 100 && mouseX < width - width/12 + 100 && mouseY < height/10 - 40 && mouseY > height/10 + 40
+      else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
         level = levels[1];
         bpm = 114;
         levelBackground = sleepwalkMVImage;
@@ -337,11 +337,10 @@ function displayGrid() {
   // Draw target line
   stroke(200);
   let keys = ["d", "g", "h", "k"];
-  // let colour = ["#d4fae6", "#d6f8ff", "#e8d4fa", "#ffebf8"];
 
   for (let i = 0; i < 4; i++) {
-    fill(255); //Temp
-    // fill(colour[i]); //Not workinggg
+    // fill(255); //Temp
+    fill(colours[i]); //Not workinggg
     rect(i * TILE_WIDTH + (width/2 - TILE_WIDTH*2), height - height/8, TILE_WIDTH, TILE_HEIGHT);
 
     fill(0);
@@ -370,7 +369,8 @@ function playLevel() {
     }
     
     if (level[i].y >= height + TILE_HEIGHT) {
-      level.splice(i, 1);
+      level.shift();
+      // level.splice(i, 1);
     } 
     // text(distFromLine, width/2, height/3); //Maybe move out into draw loop
   }
