@@ -18,13 +18,15 @@ let highScore;
 let skz;
 let sleepwalkMVImage;
 let levelBackground;
+let back;
 let colours = ["#d4fae6", "#e8d4fa", "#d6f8ff", "#ffebf8"];
 
 let duck;
 let dragon;
 let dragonMusic;
+let font;
 
-let music = [];
+let music;
 let chkChkBoom;
 let sleepwalk;
 let hit;
@@ -44,10 +46,12 @@ function preload() {
 
   skz = loadImage("images/skz.png");
   sleepwalkMVImage = loadImage("images/sleepwalk.png");
+  back = loadImage("images/back.png");
 
   duck = loadImage("backgrounds/duck-dance.gif");
-
   dragon = loadImage("backgrounds/dragon-dance.gif");
+  
+  font = loadFont("morning.ttf")
 
   // Load level txt files
   level0 = loadStrings("txt-files/chk-chk-boom.txt");
@@ -59,23 +63,22 @@ function setup() {
   numOfRows = height/TILE_WIDTH;
   
   textAlign(CENTER);
+  textFont(font);
 
   if (getItem("highscore")) {
     highScore = getItem("highscore");
   }
-
-  // Put music into array --> Not necessary, consider removing 
-  music.push(chkChkBoom);
-  music.push(sleepwalk);
+  else {
+    highScore = 0;
+  }
 
   // Place levels into array
   levels.push(level0);
   levels.push(level1);
 
-
   // Change array to level tiles only
 
-  // Set variable to avoid infintie for loop
+  // Set variable to avoid infinite loop
   let length = levels.length;
 
   for (let i = 0; i < length; i ++) {  
@@ -96,13 +99,15 @@ function setup() {
 function draw() {
   if (screenState === "start") {
     background(251);
-    displayStartScreen(); //Maybe change backgrounds to be more interestinggg
+    displayStartScreen();
 
     instructionsButton(0);
   }
   else if (screenState === "instructions") {
-    background(245);
-    // background(random(255), random(255), random(255)); //Make it not a strobe light LOL
+    if (frameCount % 120 === 0) {
+      background(random(255), random(255), random(255));
+    }
+    fill(0, 0, 0, 100);
 
     displayInstructions();
   }
@@ -114,7 +119,7 @@ function draw() {
   }
   else if (screenState === "play") {
     background(200);
-
+    
     setTimeout(() => {
       playMusic(); 
     }, 2000);
@@ -123,14 +128,12 @@ function draw() {
     playLevel();
 
     instructionsButton(240);
+    pauseButton();
   }
   else if (screenState === "pause") {
     displayGrid();
 
     displayPauseScreen();
-    // Page where rect pops up in middle 
-    // Background is level paused (draw it without playLevel())
-    // Find a way to make it pause before starting again...
   }
   else if (screenState === "score") {
     background(255);
@@ -173,19 +176,19 @@ function displayStartScreen() {
   
   fill(0);
   textSize(120);
-  text("Random", width/2 - 30, height/6 * 2);
-  text("Rhythm", width/2 + 60, height/6 * 3);
+  text("Random", width/2 - 30, height/3);
+  text("Rhythm", width/2 + 60, height/2);
   
   textSize(30);
-  text("A rhythm game of miscellaneous songs", width/2, height/7 * 4);
+  text("A rhythm game of miscellaneous songs", width/2, height/5 * 3);
   
   textSize(60);
-  text("Let's go!", width/2, height/8 * 6);
+  text("Let's go!", width/2, height/14 * 11);
 
-  if (mouseX > width/2 - 140 && mouseX < width/2 + 140 && mouseY > height/9 * 6 && mouseY < height/9 * 6 + 80) {
+  if (mouseX > width/2 - 140 && mouseX < width/2 + 140 && mouseY > height/4 * 3 - 50 && mouseY < height/4 * 3 + 50) {
     stroke(0);
     fill(0, 0, 0, 0);
-    rect(width/2 - 140, height/9 * 6, 280, 80, 10);
+    rect(width/2 - 140, height/4 * 3 - 50, 280, 100, 10);
     
     if (mouseIsPressed) {
       screenState = "selection";
@@ -200,25 +203,36 @@ function instructionsButton(textColour) {
 
   noStroke();
   fill(textColour);
-  textSize(20);
-  text("Instructions", width - width/12, height/10);
+  textSize(22);
+  text("Instructions", width - width/12, height/9);
+  
+  if (mouseIsPressed) {
+    instructionsButtonPressed();
+  }
+}
 
+function instructionsButtonPressed() {
   if (mouseX > width - width/12 - 100 && mouseX < width - width/12 + 100 && mouseY > height/10 - 40 && mouseY < height/10 + 40 && mouseIsPressed) {
+    if (music === chkChkBoom || music === sleepwalk) {
+      music.stop();
+    }
+
     previousScreen = screenState;
     screenState = "instructions";
+    background(random(255), random(255), random(255));
   }
 }
 
 function displayInstructions() {
   noStroke();
-  fill(0); 
+  fill(255); 
   textSize(65);
   text("How To Play", width/2, height/5);
 
   textSize(35);
-  text("Press the right key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!\n\nThere are tap tiles (press once) and hold tiles (hold down the key).\nMake sure you know which key to press!", width/2, height/3); //Edit later
-  textSize(30);
-  text("Keys - d (left column)\ng (middle-left column)\nh (right-middle column)\nk (right column)", width/2, height/8 * 5);
+  text("Press the right key at the right time to increase your score!\nThe closer to the target line you are,\nthe more points you'll get!\n\nThere are tap tiles (press once) and hold tiles (hold down the key).\nMake sure you know which key to press!", width/2, height/10*3); //Edit later
+  textSize(20);
+  text("Keys - d (left column)\ng (middle-left column)\nh (right-middle column)\nk (right column)", width/2, height/14 * 9);
 
   backButton();
 }
@@ -282,11 +296,17 @@ function displaySelectionScreen() {
         level = levels[0];
         bpm = 102;
         levelBackground = skz;
+        music = chkChkBoom;
+      }
+      else if (mouseX > width - width/12 - 100 && mouseX < width - width/12 + 100 && mouseY > height/10 - 40 && mouseY < height/10 + 40) {
+        instructionsButtonPressed();
+        return;
       }
       else if (mouseX > width/2 && mouseX < width && mouseY > 0 && mouseY < height) {
         level = levels[1];
         bpm = 114;
         levelBackground = sleepwalkMVImage;
+        music = sleepwalk;
       }
       screenState = "play";
     }
@@ -294,27 +314,13 @@ function displaySelectionScreen() {
 }
 
 function playMusic() {
-  if (level === levels[0]) {
-    if (!music[0].isPlaying()) {
-      music[0].play();
-    }
-    music[0].onended(endLevel);
+  if (!music.isPlaying()) {
+    music.play();
   }
-  else if (level === levels[1]) {
-    if (!music[1].isPlaying()) {
-      music[1].play();
-    }
-    music[1].onended(endLevel);
+  
+  if (screenState === "play") {
+    music.onended(screenState = "score");
   }
-}
-
-function endLevel() {
-  textSize(80);
-  text("Cleared!", width/2, height/2);
-
-  setTimeout(() => {
-    screenState = "score";
-  }, 1000);
 }
 
 function displayGrid() {
@@ -339,8 +345,7 @@ function displayGrid() {
   let keys = ["d", "g", "h", "k"];
 
   for (let i = 0; i < 4; i++) {
-    // fill(255); //Temp
-    fill(colours[i]); //Not workinggg
+    fill(colours[i]); 
     rect(i * TILE_WIDTH + (width/2 - TILE_WIDTH*2), height - height/8, TILE_WIDTH, TILE_HEIGHT);
 
     fill(0);
@@ -363,18 +368,78 @@ function playLevel() {
     level[i].move();
     level[i].display();
 
-    if ((key === "d" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "k" && level[i].column === 3) && keyIsPressed) { //Possible to just use y value
+    if ((key === "d" && level[i].column === 0 || key === "g" && level[i].column === 1 || key === "h" && level[i].column === 2 || key === "k" && level[i].column === 3) && keyIsPressed) {
       let distFromLine = getDistance(abs(dist(level[i].x, level[i].y, width/2 - TILE_WIDTH*2 + TILE_WIDTH*level[i].column, height  - height/8))); 
       checkHit(distFromLine); 
     }
     
     if (level[i].y >= height + TILE_HEIGHT) {
       level.shift();
-      // level.splice(i, 1);
     } 
-    // text(distFromLine, width/2, height/3); //Maybe move out into draw loop
   }
 }
+
+function pauseButton() {
+  stroke(255);
+  fill(0, 0, 0, 20);
+
+  circle(width - width/16, height/4, 80);
+  image(back, width - width/16 - back.width/20, height/4 - back.height/20, back.width/10, back.height/10);
+
+  if (dist(mouseX, mouseY, width - width/16, height/4) < 40 && mouseIsPressed) {
+    music.stop();
+    screenState = "pause";
+  }
+}
+
+function displayPauseScreen() {
+  noStroke();
+  fill(0, 0, 0, 20);
+  rect(0, 0, width, height);
+
+  stroke(0);
+  fill(0, 0, 0, 80);
+  rect(width/12, height/10, width/12 * 10, height/10 * 8, 10);
+
+  noStroke();
+  fill(255);
+  textSize(80);
+  text("Level paused", width/2, height/3);
+
+  // Button back to selection screen 
+  stroke(255);
+  fill(0, 0, 0, 0);
+  rect(width/2 - 150, height/2 - 50, 300, 80);
+
+  fill(255);
+  textSize(30);
+  text("Back to Selection Screen", width/2, height/2);
+
+
+  // Button to continue 
+  fill(0, 0, 0, 0);
+  rect(width/2 - 100, height/10 * 7 - 50, 200, 80);
+
+  fill(255);
+  text("Continue", width/2, height/10 * 7);
+
+  if (mouseIsPressed) {
+    resumeButtonCheck();
+  }
+}
+
+function resumeButtonCheck() {
+  // Go back to selection screen
+  if (mouseX > width/2 - 100 && mouseX < width/2 + 100 && mouseY > height/2 - 50 && mouseY < height/2 + 30) {
+    screenState = "selection";
+  }
+
+  // Resume the level
+  else if (mouseX > width/2 - 100 && mouseX < width/2 + 100 && mouseY > height/10 * 7 - 50 && mouseY < height/10 * 7 + 30) {
+    screenState = "play";
+  }
+}
+
 
 function getDistance(distance) {
   if (distance < 15) {
@@ -399,7 +464,6 @@ function getDistance(distance) {
 }
 
 function checkHit(distance) {
-  // set an if statement for different tile types
   if (distance === "Amazing") {
     score += 100;
   }
@@ -423,7 +487,7 @@ function updateScores() {
 }
 
 function displayScore() {
-  if (!dragonMusic.isPlaying()) { //Make it stop playing after leaving score page
+  if (!dragonMusic.isPlaying()) {
     dragonMusic.loop();
   }
 
@@ -431,21 +495,21 @@ function displayScore() {
 
   noStroke();
   textSize(100);
-  text("Good Job!", width/2, height/4); //Maybe change text for different scores 
+  text("Good Job!", width/2, height/4);
 
   textSize(80);
   text(score, width/2, height/8 * 3);
 
   textSize(60);
-  text(highScore, width/3, height/6); //Check placement later
+  text('High Score: ${highScore}', width/8, height/6); //Check placement later
 
   // Button to go back to selection  
   noStroke();
-  textSize(35);
+  textSize(50);
   fill(0);
   text("Confirm", width/2, height/7 * 5);
   
-  if (mouseX > width/2 - 300 && mouseX < width/2 + 300 && mouseY > height/7 * 5 - 50 && height/7 * 5 + 50) {
+  if (mouseX > width/2 - 300 && mouseX < width/2 + 300 && mouseY > height/7 * 5 - 60 && height/7 * 5 + 40) {
     stroke(0);
     fill(0, 0, 0, 0);
     rect(width/2 - 300, height/7 * 5 - 50, 600, 100, 10);
@@ -473,6 +537,7 @@ class Tile {
   display() {
     noStroke();
     fill(this.colour);
+    rect(this.x, this.y, TILE_WIDTH, this.tileHeight, 10);
   }
 
   move() { 
@@ -480,7 +545,6 @@ class Tile {
       let secPerBeat = 60/bpm;
       let pxPerSec = 60/(1/8 * secPerBeat);
       let pxPerFrame = pxPerSec/60;
-      console.log(pxPerFrame);
 
       this.y += pxPerFrame; 
     }
@@ -491,11 +555,12 @@ class TapTile extends Tile {
   constructor(column, row) {
     super(column, row);
     this.y = 0 - TILE_HEIGHT*(this.row + 1);
+    this.tileHeight = TILE_HEIGHT;
   }
 
   display() {
     super.display();
-    rect(this.x, this.y, TILE_WIDTH, TILE_HEIGHT, 10);
+    // rect(this.x, this.y, TILE_WIDTH, this.tileHeight, 10);
   }
 
   move() {
@@ -512,7 +577,7 @@ class HoldTile extends Tile {
 
   display() {
     super.display();
-    rect(this.x, this.y, TILE_WIDTH, this.tileHeight, 10);
+    // rect(this.x, this.y, TILE_WIDTH, this.tileHeight, 10);
   }
 
   move() {
