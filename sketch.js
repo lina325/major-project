@@ -51,7 +51,7 @@ function preload() {
   duck = loadImage("backgrounds/duck-dance.gif");
   dragon = loadImage("backgrounds/dragon-dance.gif");
   
-  font = loadFont("morning.ttf")
+  font = loadFont("morning.ttf");
 
   // Load level txt files
   level0 = loadStrings("txt-files/chk-chk-boom.txt");
@@ -104,10 +104,12 @@ function draw() {
     instructionsButton(0);
   }
   else if (screenState === "instructions") {
-    if (frameCount % 120 === 0) {
+    if (frameCount % 240 === 0) {
       background(random(255), random(255), random(255));
     }
-    fill(0, 0, 0, 100);
+    // else if (frameCount % 120 === 0) {
+    //   background("fffcf0"); //Change this
+    // }
 
     displayInstructions();
   }
@@ -214,7 +216,7 @@ function instructionsButton(textColour) {
 function instructionsButtonPressed() {
   if (mouseX > width - width/12 - 100 && mouseX < width - width/12 + 100 && mouseY > height/10 - 40 && mouseY < height/10 + 40 && mouseIsPressed) {
     if (music === chkChkBoom || music === sleepwalk) {
-      music.stop();
+      music.stop(); //Check what happens here
     }
 
     previousScreen = screenState;
@@ -225,6 +227,9 @@ function instructionsButtonPressed() {
 
 function displayInstructions() {
   noStroke();
+  fill(0, 0, 0, 100);
+  rect(0, 0, width, height);
+  
   fill(255); 
   textSize(65);
   text("How To Play", width/2, height/5);
@@ -243,6 +248,7 @@ function backButton() {
   textSize(35);
   text("Ok!", width - width/2, height - height/8);
 
+  // Check click and display hover
   if (mouseX > width/2 - 100 && mouseX < width/2 + 100 && mouseY > height - height/8 - 40 && mouseY < height - height/8 + 40) { 
     stroke(0);
     fill(0, 0, 0, 0);
@@ -314,13 +320,23 @@ function displaySelectionScreen() {
 }
 
 function playMusic() {
+  // Check if done
+  if (music === chkChkBoom && music.currentTime() === 148) {
+    screenState = "score";
+  }
+  else if (music === sleepwalk && music.currentTime() === 148) {
+    screenState = "score";
+  }
+  
   if (!music.isPlaying()) {
     music.play();
   }
   
-  if (screenState === "play") {
-    music.onended(screenState = "score");
-  }
+  // music.onended(screenState = "score"); 
+  
+  // if (screenState === "play") {
+  //   music.onended(screenState = "score");
+  // }
 }
 
 function displayGrid() {
@@ -359,7 +375,7 @@ function displayGrid() {
   textSize(35); 
   text(score, width/40, height/16);
 
-  // Change alignment back --> Maybe move to next function that runs
+  // Change alignment back
   textAlign(CENTER);
 }
 
@@ -500,8 +516,8 @@ function displayScore() {
   textSize(80);
   text(score, width/2, height/8 * 3);
 
-  textSize(60);
-  text('High Score: ${highScore}', width/8, height/6); //Check placement later
+  textSize(40);
+  text(`High Score: ${highScore}`, width/8, height/6); //Check placement later
 
   // Button to go back to selection  
   noStroke();
